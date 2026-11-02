@@ -1,225 +1,205 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TT Coins</title>
+<title>CoinFlow — TikTok Coins</title>
 
 <style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:Arial,sans-serif;
+background:#09090f;
+color:white;
 }
 
-body {
-    font-family: Arial, sans-serif;
-    background: #09090f;
-    color: white;
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px;
+border-bottom:1px solid #252530;
 }
 
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #252530;
+.logo{
+font-size:24px;
+font-weight:900;
+color:#fe2c55;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: 900;
-    color: #fe2c55;
+.wallet{
+background:#181820;
+border:1px solid #30303b;
+padding:12px;
+border-radius:14px;
+font-weight:bold;
 }
 
-.wallet {
-    background: #181820;
-    border: 1px solid #30303b;
-    padding: 12px;
-    border-radius: 14px;
-    font-weight: bold;
+.wallet span{color:#25f4ee}
+
+main{
+max-width:900px;
+margin:auto;
+padding:35px 15px;
 }
 
-.wallet span {
-    color: #25f4ee;
+.hero{
+text-align:center;
+margin-bottom:35px;
 }
 
-main {
-    max-width: 900px;
-    margin: auto;
-    padding: 35px 15px;
+.hero h1{
+font-size:38px;
+margin:20px 0;
 }
 
-.hero {
-    text-align: center;
-    margin-bottom: 35px;
+.gradient{
+background:linear-gradient(90deg,#fe2c55,#25f4ee);
+-webkit-background-clip:text;
+color:transparent;
 }
 
-.hero h1 {
-    font-size: 38px;
-    margin: 20px 0;
+.hero p{color:#999}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
 }
 
-.gradient {
-    background: linear-gradient(90deg, #fe2c55, #25f4ee);
-    -webkit-background-clip: text;
-    color: transparent;
+.card{
+background:linear-gradient(145deg,#1b1b25,#101016);
+border:1px solid #30303b;
+border-radius:20px;
+padding:25px 10px;
+text-align:center;
+cursor:pointer;
+transition:.2s;
 }
 
-.hero p {
-    color: #999;
+.card:hover{
+transform:translateY(-5px);
+border-color:#fe2c55;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+.card.active{
+border:2px solid #fe2c55;
+background:#25131c;
 }
 
-.card {
-    background: linear-gradient(145deg, #1b1b25, #101016);
-    border: 1px solid #30303b;
-    border-radius: 20px;
-    padding: 25px 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: .2s;
+.coin{
+font-size:40px;
+margin-bottom:15px;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    border-color: #fe2c55;
+.amount{
+font-size:21px;
+font-weight:bold;
 }
 
-.card.active {
-    border: 2px solid #fe2c55;
-    background: #25131c;
+.price{
+color:#fe6381;
+margin-top:10px;
+font-weight:bold;
 }
 
-.coin {
-    font-size: 40px;
-    margin-bottom: 15px;
+.order{
+margin-top:25px;
+padding:25px;
+border-radius:20px;
+background:#15151d;
+border:1px solid #30303b;
 }
 
-.amount {
-    font-size: 21px;
-    font-weight: bold;
+.order h2{margin-bottom:20px}
+
+input{
+width:100%;
+padding:15px;
+border-radius:12px;
+background:#0c0c12;
+border:1px solid #30303b;
+color:white;
+margin-top:10px;
+font-size:16px;
 }
 
-.price {
-    color: #fe6381;
-    margin-top: 10px;
-    font-weight: bold;
+.profile{
+display:none;
+align-items:center;
+gap:12px;
+margin-top:15px;
+padding:15px;
+background:#20202a;
+border-radius:15px;
 }
 
-.order {
-    margin-top: 25px;
-    padding: 25px;
-    border-radius: 20px;
-    background: #15151d;
-    border: 1px solid #30303b;
+.avatar{
+width:50px;
+height:50px;
+background:linear-gradient(135deg,#fe2c55,#25f4ee);
+border-radius:50%;
+display:grid;
+place-items:center;
+font-size:22px;
+font-weight:bold;
 }
 
-.order h2 {
-    margin-bottom: 20px;
+.profile a{
+color:#25f4ee;
+margin-left:auto;
+text-decoration:none;
 }
 
-input {
-    width: 100%;
-    padding: 15px;
-    border-radius: 12px;
-    background: #0c0c12;
-    border: 1px solid #30303b;
-    color: white;
-    margin-top: 10px;
-    font-size: 16px;
+.summary{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin:25px 0;
 }
 
-.profile {
-    display: none;
-    align-items: center;
-    gap: 12px;
-    margin-top: 15px;
-    padding: 15px;
-    background: #20202a;
-    border-radius: 15px;
+.total{
+font-size:32px;
+font-weight:bold;
+color:#fe6381;
 }
 
-.avatar {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #fe2c55, #25f4ee);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-size: 22px;
-    font-weight: bold;
+button{
+width:100%;
+padding:17px;
+border:none;
+border-radius:13px;
+background:linear-gradient(90deg,#fe2c55,#ff4d83);
+color:white;
+font-size:17px;
+font-weight:bold;
+cursor:pointer;
 }
 
-.profile a {
-    color: #25f4ee;
-    margin-left: auto;
-    text-decoration: none;
+button:hover{filter:brightness(1.1)}
+
+#notice{
+text-align:center;
+margin-top:15px;
+color:#25f4ee;
 }
 
-.summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 25px 0;
+.flying{
+position:fixed;
+pointer-events:none;
+z-index:999;
+font-size:28px;
+animation:fly 1.4s forwards;
 }
 
-.total {
-    font-size: 32px;
-    font-weight: bold;
-    color: #fe6381;
+@keyframes fly{
+0%{opacity:1;transform:translate(0,0) rotate(0)}
+100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(500deg)}
 }
 
-button {
-    width: 100%;
-    padding: 17px;
-    border: none;
-    border-radius: 13px;
-    background: linear-gradient(90deg, #fe2c55, #ff4d83);
-    color: white;
-    font-size: 17px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-button:hover {
-    filter: brightness(1.1);
-}
-
-#notice {
-    text-align: center;
-    margin-top: 15px;
-    color: #25f4ee;
-}
-
-.flying {
-    position: fixed;
-    pointer-events: none;
-    z-index: 999;
-    font-size: 28px;
-    animation: fly 1.4s forwards;
-}
-
-@keyframes fly {
-    0% {
-        opacity: 1;
-        transform: translate(0, 0) rotate(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(var(--x), var(--y)) rotate(500deg);
-    }
-}
-
-@media (min-width: 600px) {
-    .grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
+@media(min-width:600px){
+.grid{grid-template-columns:repeat(3,1fr)}
 }
 </style>
 </head>
@@ -227,94 +207,100 @@ button:hover {
 <body>
 
 <header>
-    <div class="logo">♪ TT COINS</div>
+<div class="logo">✦ CoinFlow</div>
 
-    <div class="wallet">
-        👛 <span id="balance">$1,000,000</span>
-    </div>
+<div class="wallet">
+👛 My Wallet:
+<span id="balance">$1,000,000.00</span>
+</div>
 </header>
 
 <main>
 
 <section class="hero">
-    <h1>
-        Монеты TikTok<br>
-        <span class="gradient">для любимых авторов 💸</span>
-    </h1>
+<h1>
+TikTok Coins<br>
+<span class="gradient">For Your Favorite Creators 💸</span>
+</h1>
 
-    <p>Выбирай пакет монет и пополняй баланс</p>
+<p>Choose your coin package and enjoy!</p>
 </section>
 
 <div class="grid" id="packages">
 
 <div class="card active" data-coins="70" data-price="1.29">
-    <div class="coin">🪙</div>
-    <div class="amount">70 монет</div>
-    <div class="price">$1.29</div>
+<div class="coin">🪙</div>
+<div class="amount">70 Coins</div>
+<div class="price">$1.29</div>
 </div>
 
 <div class="card" data-coins="350" data-price="5.99">
-    <div class="coin">💰</div>
-    <div class="amount">350 монет</div>
-    <div class="price">$5.99</div>
+<div class="coin">💰</div>
+<div class="amount">350 Coins</div>
+<div class="price">$5.99</div>
 </div>
 
 <div class="card" data-coins="700" data-price="11.99">
-    <div class="coin">🪙</div>
-    <div class="amount">700 монет</div>
-    <div class="price">$11.99</div>
+<div class="coin">🪙</div>
+<div class="amount">700 Coins</div>
+<div class="price">$11.99</div>
 </div>
 
 <div class="card" data-coins="1400" data-price="23.99">
-    <div class="coin">💸</div>
-    <div class="amount">1,400 монет</div>
-    <div class="price">$23.99</div>
+<div class="coin">💸</div>
+<div class="amount">1,400 Coins</div>
+<div class="price">$23.99</div>
 </div>
 
 <div class="card" data-coins="3500" data-price="59.99">
-    <div class="coin">💰</div>
-    <div class="amount">3,500 монет</div>
-    <div class="price">$59.99</div>
+<div class="coin">💰</div>
+<div class="amount">3,500 Coins</div>
+<div class="price">$59.99</div>
 </div>
 
 <div class="card" data-coins="7000" data-price="119.99">
-    <div class="coin">💎</div>
-    <div class="amount">7,000 монет</div>
-    <div class="price">$119.99</div>
+<div class="coin">💎</div>
+<div class="amount">7,000 Coins</div>
+<div class="price">$119.99</div>
 </div>
 
 </div>
 
 <section class="order">
 
-<h2>🪙 Покупка монет</h2>
+<h2>🪙 Buy Coins</h2>
 
-<label for="nick">TikTok никнейм</label>
+<label for="nick">TikTok Username</label>
+
 <input id="nick" placeholder="@username">
 
 <div class="profile" id="profile">
-    <div class="avatar" id="avatar">T</div>
 
-    <div>
-        <b id="profileName">@username</b>
-        <div style="color:#999;font-size:12px;margin-top:5px">
-            TikTok аккаунт
-        </div>
-    </div>
+<div class="avatar" id="avatar">T</div>
 
-    <a id="profileLink" target="_blank">Открыть ↗</a>
+<div>
+<b id="profileName">@username</b>
+<div style="color:#999;font-size:12px;margin-top:5px">
+TikTok Account
+</div>
+</div>
+
+<a id="profileLink" target="_blank">Open Profile ↗</a>
+
 </div>
 
 <div class="summary">
-    <div>
-        <div style="color:#999">К оплате</div>
-        <div class="total" id="total">$1.29</div>
-    </div>
 
-    <div id="count">70 монет</div>
+<div>
+<div style="color:#999">Total</div>
+<div class="total" id="total">$1.29</div>
 </div>
 
-<button id="buy">Купить монеты ✨</button>
+<div id="count">70 Coins</div>
+
+</div>
+
+<button id="buy">Buy Coins ✨</button>
 
 <div id="notice"></div>
 
@@ -327,147 +313,138 @@ button:hover {
 let wallet = 1000000;
 
 let selected = {
-    coins: 70,
-    price: 1.29
+coins:70,
+price:1.29
 };
 
 const cards = document.querySelectorAll(".card");
 
-function updateWallet() {
-    document.getElementById("balance").textContent =
-        "$" + wallet.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-}
+function updateWallet(){
 
-cards.forEach(card => {
-
-    card.addEventListener("click", () => {
-
-        cards.forEach(c => c.classList.remove("active"));
-
-        card.classList.add("active");
-
-        selected = {
-            coins: Number(card.dataset.coins),
-            price: Number(card.dataset.price)
-        };
-
-        document.getElementById("total").textContent =
-            "$" + selected.price.toFixed(2);
-
-        document.getElementById("count").textContent =
-            selected.coins.toLocaleString("en-US") + " монет";
-
-    });
-
+document.getElementById("balance").textContent =
+"$" + wallet.toLocaleString("en-US",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
 });
-
-const nick = document.getElementById("nick");
-
-nick.addEventListener("input", () => {
-
-    let name = nick.value.trim().replace(/^@/, "");
-
-    if (/^[a-zA-Z0-9._]{2,24}$/.test(name)) {
-
-        document.getElementById("profile").style.display = "flex";
-
-        document.getElementById("profileName").textContent =
-            "@" + name;
-
-        document.getElementById("avatar").textContent =
-            name[0].toUpperCase();
-
-        document.getElementById("profileLink").href =
-            "https://www.tiktok.com/@" + encodeURIComponent(name);
-
-    } else {
-
-        document.getElementById("profile").style.display = "none";
-
-    }
-
-});
-
-function animation(x, y) {
-
-    const icons = ["🪙", "💵", "💸", "💰", "✨", "$"];
-
-    for (let i = 0; i < 30; i++) {
-
-        let coin = document.createElement("span");
-
-        coin.className = "flying";
-
-        coin.textContent =
-            icons[Math.floor(Math.random() * icons.length)];
-
-        coin.style.left = x + "px";
-        coin.style.top = y + "px";
-
-        coin.style.setProperty(
-            "--x",
-            (Math.random() * 500 - 250) + "px"
-        );
-
-        coin.style.setProperty(
-            "--y",
-            (-Math.random() * 400 - 50) + "px"
-        );
-
-        document.body.appendChild(coin);
-
-        setTimeout(() => coin.remove(), 1500);
-
-    }
 
 }
 
-document.getElementById("buy").addEventListener("click", event => {
+cards.forEach(card=>{
 
-    let username = nick.value.trim().replace(/^@/, "");
+card.addEventListener("click",()=>{
 
-    const notice = document.getElementById("notice");
+cards.forEach(c=>c.classList.remove("active"));
 
-    if (!/^[a-zA-Z0-9._]{2,24}$/.test(username)) {
+card.classList.add("active");
 
-        notice.style.color = "#fe6381";
-        notice.textContent = "Введите правильный TikTok никнейм";
+selected={
+coins:Number(card.dataset.coins),
+price:Number(card.dataset.price)
+};
 
-        return;
+document.getElementById("total").textContent =
+"$"+selected.price.toFixed(2);
 
-    }
+document.getElementById("count").textContent =
+selected.coins.toLocaleString("en-US")+" Coins";
 
-    if (wallet < selected.price) {
+});
 
-        notice.style.color = "#fe6381";
-        notice.textContent = "Недостаточно денег в кошельке";
+});
 
-        return;
+const nick=document.getElementById("nick");
 
-    }
+nick.addEventListener("input",()=>{
 
-    wallet -= selected.price;
+let name=nick.value.trim().replace(/^@/,"");
 
-    updateWallet();
+if(/^[a-zA-Z0-9._]{2,24}$/.test(name)){
 
-    const rect = event.currentTarget.getBoundingClientRect();
+document.getElementById("profile").style.display="flex";
 
-    animation(
-        rect.left + rect.width / 2,
-        rect.top
-    );
+document.getElementById("profileName").textContent="@"+name;
 
-    notice.style.color = "#25f4ee";
+document.getElementById("avatar").textContent=
+name[0].toUpperCase();
 
-    notice.textContent =
-        "✨ Покупка оформлена! @" +
-        username +
-        " · " +
-        selected.coins +
-        " монет";
+document.getElementById("profileLink").href=
+"https://www.tiktok.com/@"+encodeURIComponent(name);
+
+}else{
+
+document.getElementById("profile").style.display="none";
+
+}
+
+});
+
+function animation(x,y){
+
+const icons=["🪙","💵","💸","💰","✨","$"];
+
+for(let i=0;i<30;i++){
+
+let coin=document.createElement("span");
+
+coin.className="flying";
+
+coin.textContent=
+icons[Math.floor(Math.random()*icons.length)];
+
+coin.style.left=x+"px";
+coin.style.top=y+"px";
+
+coin.style.setProperty("--x",
+(Math.random()*500-250)+"px");
+
+coin.style.setProperty("--y",
+(-Math.random()*400-50)+"px");
+
+document.body.appendChild(coin);
+
+setTimeout(()=>coin.remove(),1500);
+
+}
+
+}
+
+document.getElementById("buy").addEventListener("click",event=>{
+
+let username=nick.value.trim().replace(/^@/,"");
+
+const notice=document.getElementById("notice");
+
+if(!/^[a-zA-Z0-9._]{2,24}$/.test(username)){
+
+notice.style.color="#fe6381";
+notice.textContent="Please enter a valid TikTok username.";
+
+return;
+
+}
+
+if(wallet<selected.price){
+
+notice.style.color="#fe6381";
+notice.textContent="Insufficient wallet balance.";
+
+return;
+
+}
+
+wallet-=selected.price;
+
+updateWallet();
+
+const rect=event.currentTarget.getBoundingClientRect();
+
+animation(rect.left+rect.width/2,rect.top);
+
+notice.style.color="#25f4ee";
+
+notice.textContent=
+"✨ Purchase successful! @"+
+username+" · "+selected.coins+" Coins";
 
 });
 
