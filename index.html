@@ -3,256 +3,379 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Калькулятор шансов сундука — TikTok LIVE</title>
+<title>Chest Timer — TikTok LIVE</title>
 <style>
 :root{
   --bg:#100b19;--card:#21172e;--border:#49305f;
   --accent:#873de0;--accent2:#d58aff;--muted:#b9a9c9;
-  --good:#37d67a;--warn:#ffb44d;--bad:#ff5c7a;
+  --good:#37d67a;--bad:#ff5c7a;--gift:#ff6ec7;
 }
 *{box-sizing:border-box}
-body{margin:0;padding:20px;background:radial-gradient(circle at top,#241736,var(--bg) 60%);
-  color:#fff;font-family:system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
-main{max-width:560px;margin:auto}
+body{margin:0;padding:20px;background:var(--bg);color:#fff;
+  font-family:system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+main{max-width:520px;margin:auto}
 header{text-align:center;padding:10px 0 20px}
-h1{margin:0;color:var(--accent2);letter-spacing:1px;font-size:26px}
+h1{margin:0;color:var(--accent2);letter-spacing:1px;font-size:24px}
 h3{margin:0 0 12px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin:14px 0}
-label{color:var(--muted);font-size:14px;display:block;margin-top:12px}
-input,select{width:100%;background:#130e1d;color:#fff;border:1px solid #62417d;
-  border-radius:12px;padding:13px;font:inherit;margin:6px 0}
-button{font:inherit;border:0;border-radius:12px;padding:14px;font-weight:700;cursor:pointer;
-  background:var(--accent);color:#fff;transition:.15s;touch-action:manipulation}
+
+/* Таймер */
+.timer{text-align:center;font-size:64px;font-weight:800;color:var(--accent2);margin:12px 0;
+  font-variant-numeric:tabular-nums;transition:color .3s}
+.timer.warn{color:#ffb44d}
+.timer.done{color:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.progress{height:10px;background:#130e1d;border-radius:99px;overflow:hidden;margin:0 0 14px}
+.progress>div{height:100%;width:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width .3s linear}
+
+button,select,input{font:inherit;border:0;border-radius:12px;padding:13px}
+button{background:var(--accent);color:#fff;font-weight:700;cursor:pointer;transition:.15s;
+  touch-action:manipulation}
 button:hover{filter:brightness(1.12)}
 button:active{transform:scale(.97)}
 button.secondary{background:#49345c}
-.muted{color:var(--muted)}
-.hint{font-size:12px;color:var(--muted);margin:4px 0 0}
+button.danger{background:#5c2433}
+.row{display:flex;gap:10px}
+.row button{flex:1}
+select,input{width:100%;background:#130e1d;color:#fff;border:1px solid #62417d;margin:8px 0}
+label{color:var(--muted);font-size:14px;display:block}
+small,.muted{color:var(--muted)}
+.status{text-align:center;min-height:20px;margin:0 0 14px}
 
-/* Результат */
-.result{display:none;text-align:center;padding:8px 0}
-.result.show{display:block}
-.big-pct{font-size:72px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;
-  transition:color .3s}
-.big-pct.good{color:var(--good)}
-.big-pct.warn{color:var(--warn)}
-.big-pct.bad{color:var(--bad)}
-.verdict{font-size:16px;font-weight:700;margin-top:6px}
-.verdict.good{color:var(--good)}
-.verdict.warn{color:var(--warn)}
-.verdict.bad{color:var(--bad)}
-.subtitle{font-size:13px;color:var(--muted);margin-top:6px}
+/* Статистика */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#130e1d;padding:14px;border-radius:12px;text-align:center}
+.num{font-size:26px;font-weight:800;color:var(--accent2)}
+.num.gift{color:var(--gift)}
+.num.good{color:var(--good)}
 
-/* Полоса вероятности */
-.gauge{height:14px;background:#130e1d;border-radius:99px;overflow:hidden;margin:18px 0 8px;position:relative}
-.gauge > div{height:100%;width:0;border-radius:99px;
-  background:linear-gradient(90deg,var(--bad),var(--warn),var(--good));
-  transition:width .5s ease}
-.gauge-marks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:14px}
+/* Кнопки подарков */
+.gift-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.gift-btn{background:#130e1d;color:#fff;border:1px solid #62417d;padding:12px 8px;
+  font-size:14px;font-weight:600;border-radius:12px}
+.gift-btn:hover{background:#3a2650;border-color:var(--accent2)}
+.gift-btn.clear{grid-column:1 / -1;background:#2a1a3a}
 
-/* Разбивка */
-.breakdown{display:grid;gap:10px;margin-top:18px;text-align:left}
-.brow{background:#130e1d;padding:14px;border-radius:12px;display:flex;justify-content:space-between;
-  align-items:center;font-size:14px}
-.brow .k{color:var(--muted)}
-.brow .v{font-weight:800;font-size:18px;color:var(--accent2)}
-.brow .v.good{color:var(--good)}
-.brow .v.warn{color:var(--warn)}
-.brow .v.bad{color:var(--bad)}
+/* История */
+ul{list-style:none;margin:0 0 12px;padding:0;max-height:300px;overflow:auto}
+li{padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+li:last-child{border-bottom:0}
 
-/* Прогноз по времени */
-.forecast{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.fcell{background:#130e1d;padding:12px;border-radius:12px;text-align:center}
-.fcell .t{font-size:11px;color:var(--muted)}
-.fcell .p{font-size:22px;font-weight:800;color:var(--accent2);margin-top:4px}
+/* Ручной ввод */
+.manual{display:none;margin-top:10px}
+.manual.show{display:block}
 
-/* Объяснение */
-details{background:#130e1d;border-radius:12px;padding:14px;margin-top:14px;font-size:13px;line-height:1.6}
-summary{cursor:pointer;font-weight:700;color:var(--accent2)}
-details p{margin:8px 0;color:var(--muted)}
-details b{color:#fff}
-.formula{font-family:ui-monospace,monospace;background:#0a0712;padding:10px;border-radius:8px;
-  color:var(--accent2);font-size:12px;overflow-x:auto;margin:8px 0}
+.hint{font-size:12px}
 </style>
 </head>
 <body>
 <main>
 <header>
-  <h1>🎰 КАЛЬКУЛЯТОР ШАНСОВ</h1>
-  <p class="muted">Вероятность выпадения сундука на стриме TikTok LIVE</p>
+  <h1>🎁 CHEST TIMER</h1>
+  <p class="muted">TikTok LIVE • Таймер и учёт подарков</p>
 </header>
 
+<!-- Таймер -->
 <section class="card">
-  <h3>📥 Параметры стрима</h3>
+  <div class="timer" id="clock">01:00</div>
+  <div class="progress"><div id="bar"></div></div>
+  <p class="status muted" id="status">Готов к запуску</p>
+  <div class="row">
+    <button id="start">СТАРТ</button>
+    <button class="secondary" id="reset">СБРОС</button>
+  </div>
+  <label for="duration">Длительность</label>
+  <select id="duration">
+    <option value="30">30 секунд</option>
+    <option value="60" selected>1 минута</option>
+    <option value="90">1 минута 30 секунд</option>
+    <option value="120">2 минуты</option>
+    <option value="180">3 минуты</option>
+    <option value="300">5 минут</option>
+  </select>
+</section>
 
-  <label for="online">Средний онлайн на стриме (человек)</label>
-  <input id="online" type="number" min="1" value="50" inputmode="numeric">
+<!-- Подарки -->
+<section class="card">
+  <h3>🎁 Какие подарки выпали?</h3>
+  <p class="hint muted" style="margin-top:0">Нажми на подарок — он запишется в историю и статистику.</p>
 
-  <label for="hours">Длительность стрима (часы)</label>
-  <input id="hours" type="number" min="0.5" step="0.5" value="2" inputmode="decimal">
+  <div class="gift-grid" id="giftGrid"></div>
 
-  <label for="rate">Как часто зритель «активирует» сундук (в минуту, на 1 человека)</label>
-  <input id="rate" type="number" min="0.01" step="0.1" value="0.5" inputmode="decimal">
-  <p class="hint">Сколько в среднем действий/минут, когда сундук может выпасть. Например, 0.5 = раз в 2 минуты у одного активного зрителя.</p>
+  <button class="secondary" id="manualBtn" style="width:100%">✏️ Вписать свой подарок</button>
 
-  <label for="baseChance">Базовый шанс выпадения за одну активацию (%)</label>
-  <input id="baseChance" type="number" min="0.01" max="100" step="0.1" value="2" inputmode="decimal">
-  <p class="hint">Задайте вероятность, что одна активация даст сундук. Например, 2% — обычно это и есть «казино-шанс».</p>
-
-  <label for="participants">Доля зрителей, которые вообще участвуют (%)</label>
-  <input id="participants" type="number" min="1" max="100" step="1" value="30" inputmode="numeric">
-  <p class="hint">Не все зрители тыкают сундук. 30% — типично для LIVE.</p>
-
-  <div style="display:flex;gap:10px;margin-top:16px">
-    <button id="calc" style="flex:1">РАССЧИТАТЬ ШАНС</button>
+  <div class="manual" id="manualBox">
+    <label for="manualName">Название подарка</label>
+    <input id="manualName" placeholder="Например: Екатерина">
+    <label for="manualQty">Количество</label>
+    <input id="manualQty" type="number" min="1" value="1" inputmode="numeric">
+    <button id="manualSave" style="width:100%;margin-top:6px">Добавить</button>
   </div>
 </section>
 
-<section class="card result" id="resultCard">
-  <div class="big-pct" id="bigPct">0%</div>
-  <div class="verdict" id="verdict">—</div>
-  <div class="subtitle" id="subtitle">—</div>
-
-  <div class="gauge"><div id="gaugeFill"></div></div>
-  <div class="gauge-marks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
-
-  <div class="breakdown">
-    <div class="brow"><span class="k">Активных участников</span><span class="v" id="rActive">—</span></div>
-    <div class="brow"><span class="k">Всего активаций за стрим</span><span class="v" id="rTries">—</span></div>
-    <div class="brow"><span class="k">Ожидаемых выпадений</span><span class="v" id="rExpected">—</span></div>
-    <div class="brow"><span class="k">Шанс, что сундук выпадет хотя бы раз</span><span class="v good" id="rAtLeastOne">—</span></div>
-    <div class="brow"><span class="k">Шанс, что не выпадет ни разу</span><span class="v bad" id="rNone">—</span></div>
+<!-- Статистика -->
+<section class="card">
+  <h3>📊 Статистика</h3>
+  <div class="stats">
+    <div class="stat"><div class="num" id="chests">0</div><small>Сундуков</small></div>
+    <div class="stat"><div class="num good" id="wins">0</div><small>С наградой</small></div>
+    <div class="stat"><div class="num gift" id="giftTotal">0</div><small>Подарков всего</small></div>
+    <div class="stat"><div class="num" id="rate">0%</div><small>Успешность</small></div>
   </div>
+  <h3 style="margin-top:16px;font-size:15px">Топ подарков</h3>
+  <ul id="topGifts"><li class="muted">Пока нет данных</li></ul>
+</section>
 
-  <h3 style="margin-top:20px;font-size:15px">🔮 Прогноз на разную длительность</h3>
-  <div class="forecast" id="forecast"></div>
-
-  <details>
-    <summary>Как считается</summary>
-    <p>Считаем каждую активацию как независимую попытку с шансом <b>p</b>. Вероятность, что за <b>n</b> попыток выпадет <b>хотя бы один</b> сундук:</p>
-    <div class="formula">P(хотя бы 1) = 1 − (1 − p)^n</div>
-    <p>Ожидаемое количество выпадений:</p>
-    <div class="formula">E = n × p</div>
-    <p>Где <b>n</b> — общее число активаций, <b>p</b> — базовый шанс. Это модель «независимых попыток» (как в казино).</p>
-    <p>Стоит понимать: реальный алгоритм TikTok не публикуется. Это <b>оценка</b>, а не гарантия.</p>
-  </details>
+<!-- История -->
+<section class="card">
+  <h3>📜 История</h3>
+  <ul id="history"><li class="muted">Пока записей нет</li></ul>
+  <div class="row">
+    <button class="secondary" id="addEmpty" style="flex:1">+ Сундук без подарка</button>
+    <button class="danger" id="clear" style="flex:1">Очистить</button>
+  </div>
 </section>
 
 <p class="muted" style="text-align:center;font-size:12px">
-  Это статистическая оценка, а не предсказание. Реальный алгоритм TikTok неизвестен.
+  Автосохранение на этом устройстве.<br>
+  Сайт не подключается к TikTok автоматически.
 </p>
 </main>
 
 <script>
 (() => {
   "use strict";
+  const STORAGE = "chestSimpleV1";
   const $ = id => document.getElementById(id);
 
-  function num(id, def){
-    const v = parseFloat($(id).value);
-    return Number.isFinite(v) && v > 0 ? v : def;
+  // ---------- Список подарков ----------
+  const GIFT_LIST = [
+    "Роза", "TikTok", "Лев", "Ракета", "Медведь",
+    "Корона", "Плюшевый мишка", "Галактика", "Екатерина",
+    "Университет", "Дракон", "Звезда"
+  ];
+
+  // ---------- Данные ----------
+  let data = load();
+  function empty(){
+    return {chests:0, wins:0, gifts:0, giftTypes:{}, history:[]};
+  }
+  function load(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(STORAGE) || "null");
+      if(raw && typeof raw === "object"){
+        return {
+          chests: +raw.chests || 0,
+          wins: +raw.wins || 0,
+          gifts: +raw.gifts || 0,
+          giftTypes: raw.giftTypes && typeof raw.giftTypes === "object" ? raw.giftTypes : {},
+          history: Array.isArray(raw.history) ? raw.history : []
+        };
+      }
+    }catch(e){}
+    return empty();
+  }
+  function save(){
+    try{ localStorage.setItem(STORAGE, JSON.stringify(data)); }catch(e){}
   }
 
-  function clamp(v, a, b){ return Math.min(b, Math.max(a, v)); }
-
-  function fmt(v){
-    if(v >= 100) return "100%";
-    if(v >= 10) return v.toFixed(1) + "%";
-    if(v >= 1) return v.toFixed(2) + "%";
-    return v.toFixed(3) + "%";
-  }
-
-  function fmtNum(v){
-    if(v >= 1e6) return (v/1e6).toFixed(2) + "M";
-    if(v >= 1e3) return (v/1e3).toFixed(1) + "k";
-    return Math.round(v).toString();
-  }
-
-  function calc(){
-    const online = num("online", 50);
-    const hours = num("hours", 2);
-    const rate = num("rate", 0.5);         // активаций в минуту на участника
-    const base = clamp(num("baseChance", 2), 0.001, 100) / 100;
-    const part = clamp(num("participants", 30), 1, 100) / 100;
-
-    const active = online * part;
-    const minutes = hours * 60;
-    const tries = active * rate * minutes;
-
-    // ожидаемое число выпадений
-    const expected = tries * base;
-
-    // P(хотя бы 1)
-    const atLeastOne = 1 - Math.pow(1 - base, tries);
-    const none = Math.pow(1 - base, tries);
-
-    return {online, hours, rate, base, part, active, tries, expected, atLeastOne, none};
-  }
-
+  // ---------- Отрисовка ----------
   function render(){
-    const r = calc();
+    $("chests").textContent = data.chests;
+    $("wins").textContent = data.wins;
+    $("giftTotal").textContent = data.gifts;
+    $("rate").textContent = data.chests
+      ? Math.round(data.wins / data.chests * 100) + "%" : "0%";
 
-    // главный процент
-    const pct = r.atLeastOne * 100;
-    const bigPct = $("bigPct");
-    bigPct.textContent = fmt(pct);
+    // топ подарков
+    const sorted = Object.entries(data.giftTypes).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    $("topGifts").innerHTML = sorted.length
+      ? sorted.map(([name, count]) =>
+          `<li><span style="color:var(--gift)">🎁 ${escapeHtml(name)}</span>
+           <span class="muted" style="float:right">×${count}</span></li>`
+        ).join("")
+      : `<li class="muted">Пока нет данных</li>`;
 
-    let cls = "bad", verdict = "Очень низкий шанс", note = "Скорее всего, сундук не выпадет. Увеличьте шанс или онлайн.";
-    if(pct >= 75){ cls = "good"; verdict = "Высокий шанс ✅"; note = "Хорошая вероятность, что сундук выпадет хотя бы раз."; }
-    else if(pct >= 50){ cls = "good"; verdict = "Хороший шанс"; note = "Больше шансов, что выпадет, чем нет."; }
-    else if(pct >= 25){ cls = "warn"; verdict = "Средний шанс"; note = "Возможно, но не гарантированно. Всё зависит от удачи."; }
-    else if(pct >= 10){ cls = "warn"; verdict = "Низкий шанс"; note = "Скорее не выпадет, чем выпадет."; }
-
-    bigPct.className = "big-pct " + cls;
-    $("verdict").className = "verdict " + cls;
-    $("verdict").textContent = verdict;
-    $("subtitle").textContent = note;
-
-    // гейдж
-    $("gaugeFill").style.width = clamp(pct, 0, 100) + "%";
-
-    // разбивка
-    $("rActive").textContent = fmtNum(r.active);
-    $("rTries").textContent = fmtNum(r.tries);
-    $("rExpected").textContent = r.expected.toFixed(2);
-    $("rAtLeastOne").textContent = fmt(pct);
-    $("rNone").textContent = fmt(r.none * 100);
-
-    // прогноз на 1/2/4 часа
-    const forecastEl = $("forecast");
-    const periods = [1, 2, 4];
-    forecastEl.innerHTML = periods.map(h => {
-      const triesH = r.active * r.rate * h * 60;
-      const p = (1 - Math.pow(1 - r.base, triesH)) * 100;
-      const c = p >= 75 ? "good" : p >= 40 ? "warn" : "bad";
-      return `<div class="fcell">
-        <div class="t">${h} ч стрима</div>
-        <div class="p" style="color:var(--${c === 'good' ? 'good' : c === 'warn' ? 'warn' : 'bad'})">${fmt(p)}</div>
-      </div>`;
-    }).join("");
-
-    // показать карточку
-    $("resultCard").classList.add("show");
+    // история
+    $("history").innerHTML = data.history.length
+      ? data.history.map(h => `<li>${h}</li>`).join("")
+      : `<li class="muted">Пока записей нет</li>`;
   }
 
-  $("calc").onclick = render;
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    })[c]);
+  }
 
-  // Enter в любом поле = расчёт
-  document.querySelectorAll("input").forEach(el => {
-    el.addEventListener("keydown", e => {
-      if(e.key === "Enter"){ e.preventDefault(); render(); }
-    });
+  // ---------- Кнопки подарков ----------
+  function renderGiftButtons(){
+    $("giftGrid").innerHTML = GIFT_LIST.map(name =>
+      `<button class="gift-btn" data-gift="${escapeHtml(name)}">${escapeHtml(name)}</button>`
+    ).join("");
+  }
+
+  $("giftGrid").addEventListener("click", e => {
+    const b = e.target.closest("[data-gift]");
+    if(!b) return;
+    recordGift(b.dataset.gift, 1);
   });
 
-  // живой пересчёт при изменении
-  document.querySelectorAll("input").forEach(el => {
-    el.addEventListener("input", () => {
-      if($("resultCard").classList.contains("show")) render();
-    });
+  // ---------- Запись ----------
+  function nowStr(){
+    return new Date().toLocaleString("ru-RU", {dateStyle:"short", timeStyle:"short"});
+  }
+
+  function recordGift(name, qty){
+    name = String(name).trim() || "Подарок";
+    qty = Math.max(1, Math.floor(qty));
+
+    data.chests++;
+    data.wins++;
+    data.gifts += qty;
+    data.giftTypes[name] = (data.giftTypes[name] || 0) + qty;
+
+    const time = nowStr();
+    data.history.unshift(
+      `<span class="muted">${time}</span> — ` +
+      `<span style="color:var(--gift)">🎁 ${escapeHtml(name)} ×${qty}</span>`
+    );
+    data.history = data.history.slice(0, 50);
+    save(); render();
+  }
+
+  function recordEmpty(){
+    data.chests++;
+    const time = nowStr();
+    data.history.unshift(
+      `<span class="muted">${time}</span> — <span style="color:var(--bad)">без подарка</span>`
+    );
+    data.history = data.history.slice(0, 50);
+    save(); render();
+  }
+
+  // ---------- Ручной ввод ----------
+  $("manualBtn").onclick = () => {
+    $("manualBox").classList.toggle("show");
+    if($("manualBox").classList.contains("show")) $("manualName").focus();
+  };
+
+  $("manualSave").onclick = () => {
+    const name = $("manualName").value.trim();
+    const qty = Number($("manualQty").value);
+    if(!name){ alert("Введи название подарка"); $("manualName").focus(); return; }
+    if(!Number.isFinite(qty) || qty <= 0){ alert("Количество должно быть больше нуля"); return; }
+    recordGift(name, qty);
+    $("manualName").value = "";
+    $("manualQty").value = "1";
+    $("manualBox").classList.remove("show");
+  };
+
+  $("manualName").addEventListener("keydown", e => {
+    if(e.key === "Enter") $("manualSave").click();
   });
 
-  // при загрузке сразу считаем с дефолтами
+  // ---------- Таймер ----------
+  let duration = 60, remaining = duration, running = false, interval = null, endTime = 0;
+
+  function formatTime(sec){
+    const m = Math.floor(sec / 60), s = sec % 60;
+    return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  }
+  function renderTime(){
+    const clock = $("clock");
+    clock.textContent = formatTime(remaining);
+    clock.classList.toggle("warn", remaining <= 10 && remaining > 0 && running);
+    clock.classList.toggle("done", remaining <= 0);
+    const pct = duration > 0 ? Math.max(0, remaining / duration) * 100 : 0;
+    $("bar").style.width = pct + "%";
+  }
+  function tick(){
+    remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+    renderTime();
+    if(remaining <= 0) finish();
+  }
+  function finish(){
+    clearInterval(interval); interval = null; running = false;
+    $("start").textContent = "СТАРТ";
+    $("status").textContent = "⏰ Время вышло!";
+    renderTime(); signal();
+  }
+  function start(){
+    if(running){
+      clearInterval(interval); interval = null; running = false;
+      remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+      $("start").textContent = "ПРОДОЛЖИТЬ";
+      $("status").textContent = "Пауза";
+      renderTime(); return;
+    }
+    if(remaining <= 0) reset();
+    try{ audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)(); audioCtx.resume(); }catch(e){}
+    running = true;
+    endTime = Date.now() + remaining * 1000;
+    $("start").textContent = "ПАУЗА";
+    $("status").textContent = "Таймер запущен";
+    clearInterval(interval);
+    interval = setInterval(tick, 250);
+    tick();
+  }
+  function reset(){
+    clearInterval(interval); interval = null; running = false;
+    duration = Math.max(1, Number($("duration").value) || 60);
+    remaining = duration;
+    $("start").textContent = "СТАРТ";
+    $("status").textContent = "Готов к запуску";
+    renderTime();
+  }
+
+  // ---------- Звук ----------
+  let audioCtx = null;
+  function signal(){
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = audioCtx.currentTime;
+      [0, .25, .5].forEach(o0 => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, t + o0);
+        g.gain.exponentialRampToValueAtTime(0.3, t + o0 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + o0 + 0.2);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(t + o0); o.stop(t + o0 + 0.22);
+      });
+    }catch(e){}
+    if(navigator.vibrate) navigator.vibrate([300,150,300]);
+  }
+
+  // ---------- События ----------
+  $("start").onclick = start;
+  $("reset").onclick = () => {
+    if((running || remaining < duration) && !confirm("Сбросить таймер?")) return;
+    reset();
+  };
+  $("duration").onchange = reset;
+  $("addEmpty").onclick = recordEmpty;
+  $("clear").onclick = () => {
+    if(confirm("Удалить всю статистику и историю?")){
+      data = empty(); save(); render();
+    }
+  };
+
+  document.addEventListener("keydown", e => {
+    const tag = document.activeElement.tagName;
+    if(e.code === "Space" && tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA"){
+      e.preventDefault(); start();
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if(!document.hidden && running) tick();
+  });
+
+  // ---------- Старт ----------
+  renderGiftButtons();
   render();
+  reset();
 })();
 </script>
 </body>
