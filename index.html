@@ -8,7 +8,7 @@
 :root{
   --bg:#100b19;--card:#21172e;--border:#49305f;
   --accent:#873de0;--accent2:#d58aff;--muted:#b9a9c9;
-  --good:#37d67a;--bad:#ff5c7a;--gift:#ff6ec7;
+  --good:#37d67a;--bad:#ff5c7a;--coin:#ffc83d;--gift:#ff6ec7;
 }
 *{box-sizing:border-box}
 body{margin:0;padding:20px;background:var(--bg);color:#fff;
@@ -19,7 +19,6 @@ h1{margin:0;color:var(--accent2);letter-spacing:1px;font-size:24px}
 h3{margin:0 0 12px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin:14px 0}
 
-/* Таймер */
 .timer{text-align:center;font-size:64px;font-weight:800;color:var(--accent2);margin:12px 0;
   font-variant-numeric:tabular-nums;transition:color .3s}
 .timer.warn{color:#ffb44d}
@@ -36,6 +35,8 @@ button:hover{filter:brightness(1.12)}
 button:active{transform:scale(.97)}
 button.secondary{background:#49345c}
 button.danger{background:#5c2433}
+button.good{background:var(--good);color:#06230f}
+button.bad{background:var(--bad);color:#2a0410}
 .row{display:flex;gap:10px}
 .row button{flex:1}
 select,input{width:100%;background:#130e1d;color:#fff;border:1px solid #62417d;margin:8px 0}
@@ -43,28 +44,16 @@ label{color:var(--muted);font-size:14px;display:block}
 small,.muted{color:var(--muted)}
 .status{text-align:center;min-height:20px;margin:0 0 14px}
 
-/* Статистика */
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat{background:#130e1d;padding:14px;border-radius:12px;text-align:center}
 .num{font-size:26px;font-weight:800;color:var(--accent2)}
+.num.coin{color:var(--coin)}
 .num.gift{color:var(--gift)}
 .num.good{color:var(--good)}
 
-/* Кнопки подарков */
-.gift-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.gift-btn{background:#130e1d;color:#fff;border:1px solid #62417d;padding:12px 8px;
-  font-size:14px;font-weight:600;border-radius:12px}
-.gift-btn:hover{background:#3a2650;border-color:var(--accent2)}
-.gift-btn.clear{grid-column:1 / -1;background:#2a1a3a}
-
-/* История */
 ul{list-style:none;margin:0 0 12px;padding:0;max-height:300px;overflow:auto}
 li{padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
 li:last-child{border-bottom:0}
-
-/* Ручной ввод */
-.manual{display:none;margin-top:10px}
-.manual.show{display:block}
 
 .hint{font-size:12px}
 </style>
@@ -73,7 +62,7 @@ li:last-child{border-bottom:0}
 <main>
 <header>
   <h1>🎁 CHEST TIMER</h1>
-  <p class="muted">TikTok LIVE • Таймер и учёт подарков</p>
+  <p class="muted">TikTok LIVE • Таймер и учёт наград</p>
 </header>
 
 <!-- Таймер -->
@@ -96,22 +85,24 @@ li:last-child{border-bottom:0}
   </select>
 </section>
 
-<!-- Подарки -->
+<!-- Запись награды -->
 <section class="card">
-  <h3>🎁 Какие подарки выпали?</h3>
-  <p class="hint muted" style="margin-top:0">Нажми на подарок — он запишется в историю и статистику.</p>
+  <h3>📝 Что выпало?</h3>
 
-  <div class="gift-grid" id="giftGrid"></div>
+  <label for="coinInput">Монеты (если выпали)</label>
+  <input id="coinInput" type="number" min="0" inputmode="numeric" placeholder="Например: 100">
 
-  <button class="secondary" id="manualBtn" style="width:100%">✏️ Вписать свой подарок</button>
+  <label for="giftName">Подарок (если выпал)</label>
+  <input id="giftName" list="giftList" placeholder="Название подарка">
 
-  <div class="manual" id="manualBox">
-    <label for="manualName">Название подарка</label>
-    <input id="manualName" placeholder="Например: Екатерина">
-    <label for="manualQty">Количество</label>
-    <input id="manualQty" type="number" min="1" value="1" inputmode="numeric">
-    <button id="manualSave" style="width:100%;margin-top:6px">Добавить</button>
+  <label for="giftQty">Количество подарка</label>
+  <input id="giftQty" type="number" min="1" value="1" inputmode="numeric">
+
+  <div class="row" style="margin-top:12px">
+    <button class="good" id="save">✅ Записать</button>
+    <button class="bad" id="empty">❌ Без награды</button>
   </div>
+  <p class="hint muted">Можно заполнить монеты, подарок или всё вместе.</p>
 </section>
 
 <!-- Статистика -->
@@ -120,8 +111,8 @@ li:last-child{border-bottom:0}
   <div class="stats">
     <div class="stat"><div class="num" id="chests">0</div><small>Сундуков</small></div>
     <div class="stat"><div class="num good" id="wins">0</div><small>С наградой</small></div>
-    <div class="stat"><div class="num gift" id="giftTotal">0</div><small>Подарков всего</small></div>
-    <div class="stat"><div class="num" id="rate">0%</div><small>Успешность</small></div>
+    <div class="stat"><div class="num coin" id="coins">0</div><small>Монет</small></div>
+    <div class="stat"><div class="num gift" id="giftTotal">0</div><small>Подарков</small></div>
   </div>
   <h3 style="margin-top:16px;font-size:15px">Топ подарков</h3>
   <ul id="topGifts"><li class="muted">Пока нет данных</li></ul>
@@ -131,10 +122,7 @@ li:last-child{border-bottom:0}
 <section class="card">
   <h3>📜 История</h3>
   <ul id="history"><li class="muted">Пока записей нет</li></ul>
-  <div class="row">
-    <button class="secondary" id="addEmpty" style="flex:1">+ Сундук без подарка</button>
-    <button class="danger" id="clear" style="flex:1">Очистить</button>
-  </div>
+  <button class="danger" id="clear" style="width:100%">Очистить</button>
 </section>
 
 <p class="muted" style="text-align:center;font-size:12px">
@@ -146,20 +134,12 @@ li:last-child{border-bottom:0}
 <script>
 (() => {
   "use strict";
-  const STORAGE = "chestSimpleV1";
+  const STORAGE = "chestSimpleV2";
   const $ = id => document.getElementById(id);
 
-  // ---------- Список подарков ----------
-  const GIFT_LIST = [
-    "Роза", "TikTok", "Лев", "Ракета", "Медведь",
-    "Корона", "Плюшевый мишка", "Галактика", "Екатерина",
-    "Университет", "Дракон", "Звезда"
-  ];
-
-  // ---------- Данные ----------
   let data = load();
   function empty(){
-    return {chests:0, wins:0, gifts:0, giftTypes:{}, history:[]};
+    return {chests:0, wins:0, coins:0, gifts:0, giftTypes:{}, history:[]};
   }
   function load(){
     try{
@@ -168,6 +148,7 @@ li:last-child{border-bottom:0}
         return {
           chests: +raw.chests || 0,
           wins: +raw.wins || 0,
+          coins: +raw.coins || 0,
           gifts: +raw.gifts || 0,
           giftTypes: raw.giftTypes && typeof raw.giftTypes === "object" ? raw.giftTypes : {},
           history: Array.isArray(raw.history) ? raw.history : []
@@ -180,15 +161,19 @@ li:last-child{border-bottom:0}
     try{ localStorage.setItem(STORAGE, JSON.stringify(data)); }catch(e){}
   }
 
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    })[c]);
+  }
+
   // ---------- Отрисовка ----------
   function render(){
     $("chests").textContent = data.chests;
     $("wins").textContent = data.wins;
+    $("coins").textContent = data.coins.toLocaleString("ru-RU");
     $("giftTotal").textContent = data.gifts;
-    $("rate").textContent = data.chests
-      ? Math.round(data.wins / data.chests * 100) + "%" : "0%";
 
-    // топ подарков
     const sorted = Object.entries(data.giftTypes).sort((a,b) => b[1] - a[1]).slice(0, 5);
     $("topGifts").innerHTML = sorted.length
       ? sorted.map(([name, count]) =>
@@ -197,49 +182,39 @@ li:last-child{border-bottom:0}
         ).join("")
       : `<li class="muted">Пока нет данных</li>`;
 
-    // история
     $("history").innerHTML = data.history.length
       ? data.history.map(h => `<li>${h}</li>`).join("")
       : `<li class="muted">Пока записей нет</li>`;
   }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    })[c]);
-  }
-
-  // ---------- Кнопки подарков ----------
-  function renderGiftButtons(){
-    $("giftGrid").innerHTML = GIFT_LIST.map(name =>
-      `<button class="gift-btn" data-gift="${escapeHtml(name)}">${escapeHtml(name)}</button>`
-    ).join("");
-  }
-
-  $("giftGrid").addEventListener("click", e => {
-    const b = e.target.closest("[data-gift]");
-    if(!b) return;
-    recordGift(b.dataset.gift, 1);
-  });
 
   // ---------- Запись ----------
   function nowStr(){
     return new Date().toLocaleString("ru-RU", {dateStyle:"short", timeStyle:"short"});
   }
 
-  function recordGift(name, qty){
-    name = String(name).trim() || "Подарок";
-    qty = Math.max(1, Math.floor(qty));
+  function record(coins, giftName, giftQty){
+    const hasCoins = coins > 0;
+    const hasGift = !!giftName;
+    if(!hasCoins && !hasGift) return; // пусто — не записываем
 
     data.chests++;
     data.wins++;
-    data.gifts += qty;
-    data.giftTypes[name] = (data.giftTypes[name] || 0) + qty;
+
+    const parts = [];
+
+    if(hasCoins){
+      data.coins += coins;
+      parts.push(`<span style="color:var(--coin)">🪙 +${coins}</span>`);
+    }
+    if(hasGift){
+      data.gifts += giftQty;
+      data.giftTypes[giftName] = (data.giftTypes[giftName] || 0) + giftQty;
+      parts.push(`<span style="color:var(--gift)">🎁 ${escapeHtml(giftName)} ×${giftQty}</span>`);
+    }
 
     const time = nowStr();
     data.history.unshift(
-      `<span class="muted">${time}</span> — ` +
-      `<span style="color:var(--gift)">🎁 ${escapeHtml(name)} ×${qty}</span>`
+      `<span class="muted">${time}</span> — ` + parts.join(" · ")
     );
     data.history = data.history.slice(0, 50);
     save(); render();
@@ -249,31 +224,44 @@ li:last-child{border-bottom:0}
     data.chests++;
     const time = nowStr();
     data.history.unshift(
-      `<span class="muted">${time}</span> — <span style="color:var(--bad)">без подарка</span>`
+      `<span class="muted">${time}</span> — <span style="color:var(--bad)">без награды</span>`
     );
     data.history = data.history.slice(0, 50);
     save(); render();
   }
 
-  // ---------- Ручной ввод ----------
-  $("manualBtn").onclick = () => {
-    $("manualBox").classList.toggle("show");
-    if($("manualBox").classList.contains("show")) $("manualName").focus();
+  // ---------- Кнопки записи ----------
+  $("save").onclick = () => {
+    const coinEl = $("coinInput");
+    const nameEl = $("giftName");
+    const qtyEl = $("giftQty");
+
+    const coins = Math.max(0, Math.floor(Number(coinEl.value) || 0));
+    const name = nameEl.value.trim();
+    const qty = Math.max(1, Math.floor(Number(qtyEl.value) || 1));
+
+    if(!coins && !name){
+      alert("Впиши монеты или подарок");
+      return;
+    }
+
+    record(coins, name, qty);
+
+    coinEl.value = "";
+    nameEl.value = "";
+    qtyEl.value = "1";
+    coinEl.focus();
   };
 
-  $("manualSave").onclick = () => {
-    const name = $("manualName").value.trim();
-    const qty = Number($("manualQty").value);
-    if(!name){ alert("Введи название подарка"); $("manualName").focus(); return; }
-    if(!Number.isFinite(qty) || qty <= 0){ alert("Количество должно быть больше нуля"); return; }
-    recordGift(name, qty);
-    $("manualName").value = "";
-    $("manualQty").value = "1";
-    $("manualBox").classList.remove("show");
+  $("empty").onclick = () => {
+    if(confirm("Записать сундук без награды?")) recordEmpty();
   };
 
-  $("manualName").addEventListener("keydown", e => {
-    if(e.key === "Enter") $("manualSave").click();
+  // Enter в полях = записать
+  ["coinInput","giftName","giftQty"].forEach(id => {
+    $(id).addEventListener("keydown", e => {
+      if(e.key === "Enter"){ e.preventDefault(); $("save").click(); }
+    });
   });
 
   // ---------- Таймер ----------
@@ -355,7 +343,6 @@ li:last-child{border-bottom:0}
     reset();
   };
   $("duration").onchange = reset;
-  $("addEmpty").onclick = recordEmpty;
   $("clear").onclick = () => {
     if(confirm("Удалить всю статистику и историю?")){
       data = empty(); save(); render();
@@ -373,7 +360,6 @@ li:last-child{border-bottom:0}
   });
 
   // ---------- Старт ----------
-  renderGiftButtons();
   render();
   reset();
 })();
