@@ -3,155 +3,314 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TikTok LIVE Chest Timer</title>
+<title>NEON CHEST TIMER — TikTok LIVE</title>
 <style>
+:root{
+  --bg:#100b19;--card:#21172e;--border:#49305f;
+  --accent:#873de0;--accent2:#d58aff;--text:#fff;--muted:#b9a9c9;
+  --good:#37d67a;--bad:#ff5c7a;
+}
 *{box-sizing:border-box}
-body{margin:0;padding:20px;background:#100b19;color:white;font-family:Arial,sans-serif}
+body{margin:0;padding:20px;background:radial-gradient(circle at top,#241736,var(--bg) 60%);
+  color:var(--text);font-family:system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
 main{max-width:520px;margin:auto}
-header{text-align:center;padding:20px}
-h1{color:#d8a5ff}
-.card{background:#21172e;border:1px solid #49305f;border-radius:18px;padding:18px;margin:14px 0}
-.timer{text-align:center;font-size:65px;font-weight:bold;color:#d58aff;margin:20px}
-button,select,input{border:0;border-radius:10px;padding:13px;font-size:15px}
-button{background:#873de0;color:white;font-weight:bold;cursor:pointer}
+header{text-align:center;padding:10px 0 20px}
+h1{margin:0;color:var(--accent2);letter-spacing:1px}
+h3{margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin:14px 0}
+.timer{text-align:center;font-size:64px;font-weight:800;color:var(--accent2);margin:12px 0;
+  font-variant-numeric:tabular-nums;transition:color .3s}
+.timer.warn{color:#ffb44d}
+.timer.done{color:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.progress{height:10px;background:#130e1d;border-radius:99px;overflow:hidden;margin:0 0 14px}
+.progress>div{height:100%;width:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width .3s linear}
+button,select,input{font:inherit;border:0;border-radius:12px;padding:13px}
+button{background:var(--accent);color:white;font-weight:700;cursor:pointer;transition:.15s;
+  touch-action:manipulation}
+button:hover{filter:brightness(1.12)}
+button:active{transform:scale(.97)}
 button.secondary{background:#49345c}
+button.danger{background:#5c2433}
+button:disabled{opacity:.45;cursor:not-allowed}
 .row{display:flex;gap:10px}
 .row button{flex:1}
 select,input{width:100%;background:#130e1d;color:white;border:1px solid #62417d;margin:8px 0}
+label{color:var(--muted);font-size:14px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat{background:#130e1d;padding:14px;border-radius:12px}
-.num{font-size:26px;font-weight:bold;color:#d8a5ff}
-small,.muted{color:#b9a9c9}
-li{padding:9px 0;border-bottom:1px solid #49305f;font-size:13px}
+.stat{background:#130e1d;padding:14px;border-radius:12px;text-align:center}
+.num{font-size:26px;font-weight:800;color:var(--accent2)}
+ul{list-style:none;margin:0 0 12px;padding:0;max-height:220px;overflow:auto}
+li{padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+li:last-child{border-bottom:0}
+small,.muted{color:var(--muted)}
+.status{text-align:center;min-height:20px;margin:0 0 14px}
 </style>
 </head>
 <body>
 <main>
 <header>
-<h1>NEON CHEST TIMER</h1>
-<p class="muted">TikTok LIVE • Таймер сундуков</p>
+  <h1>NEON CHEST TIMER</h1>
+  <p class="muted">TikTok LIVE • Таймер сундуков</p>
 </header>
 
 <section class="card">
-<div class="timer" id="clock">01:00</div>
-<p class="muted" id="status" style="text-align:center">Готов к запуску</p>
-<div class="row">
-<button id="start">СТАРТ</button>
-<button class="secondary" id="reset">СБРОС</button>
-</div>
-<label>Длительность</label>
-<select id="duration">
-<option value="30">30 секунд</option>
-<option value="60" selected>1 минута</option>
-<option value="90">1 минута 30 секунд</option>
-<option value="120">2 минуты</option>
-<option value="180">3 минуты</option>
-<option value="300">5 минут</option>
-</select>
+  <div class="timer" id="clock">01:00</div>
+  <div class="progress"><div id="bar"></div></div>
+  <p class="status muted" id="status">Готов к запуску</p>
+  <div class="row">
+    <button id="start">СТАРТ</button>
+    <button class="secondary" id="reset">СБРОС</button>
+  </div>
+  <label for="duration">Длительность</label>
+  <select id="duration">
+    <option value="30">30 секунд</option>
+    <option value="60" selected>1 минута</option>
+    <option value="90">1 минута 30 секунд</option>
+    <option value="120">2 минуты</option>
+    <option value="180">3 минуты</option>
+    <option value="300">5 минут</option>
+  </select>
 </section>
 
 <section class="card">
-<h3>📊 Статистика</h3>
-<div class="stats">
-<div class="stat"><div class="num" id="chests">0</div><small>Сундуков</small></div>
-<div class="stat"><div class="num" id="wins">0</div><small>Успешных</small></div>
-<div class="stat"><div class="num" id="coins">0</div><small>Монет получено</small></div>
-<div class="stat"><div class="num" id="rate">0%</div><small>Успешность</small></div>
-</div>
+  <h3>📊 Статистика</h3>
+  <div class="stats">
+    <div class="stat"><div class="num" id="chests">0</div><small>Сундуков</small></div>
+    <div class="stat"><div class="num" id="wins">0</div><small>Успешных</small></div>
+    <div class="stat"><div class="num" id="coins">0</div><small>Монет</small></div>
+    <div class="stat"><div class="num" id="rate">0%</div><small>Успешность</small></div>
+  </div>
 </section>
 
 <section class="card">
-<h3>🎁 Записать результат</h3>
-<label>Количество полученных монет</label>
-<input id="coinInput" type="number" min="0" placeholder="Например: 100">
-<div class="row">
-<button id="success">Получил монеты</button>
-<button class="secondary" id="failure">Не получил</button>
-</div>
-<p class="muted">Введи монеты перед нажатием «Получил монеты».</p>
+  <h3>🎁 Записать результат</h3>
+  <label for="coinInput">Количество полученных монет</label>
+  <input id="coinInput" type="number" min="1" inputmode="numeric" placeholder="Например: 100">
+  <div class="row">
+    <button id="success" style="background:var(--good);color:#06230f">Получил монеты</button>
+    <button id="failure" style="background:var(--bad);color:#2a0410">Не получил</button>
+  </div>
+  <p class="muted" style="font-size:12px">Введи монеты перед нажатием «Получил монеты».</p>
 </section>
 
 <section class="card">
-<h3>📜 История</h3>
-<ul id="history"><li class="muted">Пока записей нет</li></ul>
-<button class="secondary" id="clear" style="width:100%">Очистить статистику</button>
+  <h3>📜 История</h3>
+  <ul id="history"><li class="muted">Пока записей нет</li></ul>
+  <button class="danger" id="clear" style="width:100%">Очистить статистику</button>
 </section>
 
 <p class="muted" style="text-align:center;font-size:12px">
-Автосохранение статистики на этом устройстве.<br>
-Сайт не подключается к TikTok и не открывает сундуки автоматически.
+  Автосохранение на этом устройстве.<br>
+  Сайт не подключается к TikTok и не открывает сундуки автоматически.
 </p>
 </main>
 
 <script>
-let remaining=60;
-let running=false;
-let interval=null;
-let data=JSON.parse(localStorage.getItem("chestData")||'{"chests":0,"wins":0,"coins":0,"history":[]}');
+(() => {
+  "use strict";
+  const STORAGE = "chestDataV2";
+  const $ = id => document.getElementById(id);
 
-const $=id=>document.getElementById(id);
-function save(){
- localStorage.setItem("chestData",JSON.stringify(data));
- render();
-}
-function render(){
- $("chests").textContent=data.chests;
- $("wins").textContent=data.wins;
- $("coins").textContent=data.coins;
- $("rate").textContent=data.chests?Math.round(data.wins/data.chests*100)+"%":"0%";
- $("history").innerHTML=data.history.length?
- data.history.map(x=>"<li>"+x+"</li>").join(""):"<li class='muted'>Пока записей нет</li>";
-}
-function showTime(){
- let m=Math.floor(remaining/60),s=remaining%60;
- $("clock").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
-}
-function stop(){
- clearInterval(interval);interval=null;running=false;
- $("start").textContent="СТАРТ";
-}
-function reset(){
- stop();remaining=Number($("duration").value);
- showTime();$("status").textContent="Готов к запуску";
-}
-$("start").onclick=()=>{
- if(running){stop();$("status").textContent="Пауза";return}
- if(remaining<=0)reset();
- running=true;$("start").textContent="ПАУЗА";
- $("status").textContent="Таймер запущен";
- interval=setInterval(()=>{
-  remaining--;showTime();
-  if(remaining<=0){
-   stop();$("status").textContent="Время вышло! Проверь сундук.";
-   if(navigator.vibrate)navigator.vibrate([300,150,300]);
+  // ---------- Состояние ----------
+  let duration = 60;
+  let remaining = duration;
+  let running = false;
+  let interval = null;
+  let endTime = 0;
+
+  let data = load();
+
+  function load(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(STORAGE) || "null");
+      if(raw && typeof raw === "object") return {
+        chests: +raw.chests || 0, wins: +raw.wins || 0,
+        coins: +raw.coins || 0, history: Array.isArray(raw.history) ? raw.history : []
+      };
+    }catch(e){}
+    return {chests:0, wins:0, coins:0, history:[]};
   }
- },1000);
-};
-$("reset").onclick=reset;
-$("duration").onchange=reset;
+  function save(){
+    try{ localStorage.setItem(STORAGE, JSON.stringify(data)); }catch(e){}
+  }
 
-function record(success,coins){
- data.chests++;
- if(success){data.wins++;data.coins+=coins}
- let now=new Date().toLocaleString("ru-RU");
- data.history.unshift(now+" — "+(success?"Получено "+coins+" монет":"Без награды"));
- data.history=data.history.slice(0,50);
- save();
-}
-$("success").onclick=()=>{
- let value=Number($("coinInput").value);
- if($("coinInput").value.trim()===""||!Number.isFinite(value)||value<=0){
-  alert("Введи количество монет больше нуля");return;
- }
- record(true,Math.floor(value));$("coinInput").value="";
-};
-$("failure").onclick=()=>record(false,0);
-$("clear").onclick=()=>{
- if(confirm("Удалить всю статистику и историю?")){
-  data={chests:0,wins:0,coins:0,history:[]};save();
- }
-};
-render();reset();
+  // ---------- Отрисовка ----------
+  function render(){
+    $("chests").textContent = data.chests;
+    $("wins").textContent = data.wins;
+    $("coins").textContent = data.coins.toLocaleString("ru-RU");
+    $("rate").textContent = data.chests
+      ? Math.round(data.wins / data.chests * 100) + "%" : "0%";
+
+    const list = $("history");
+    list.innerHTML = data.history.length
+      ? data.history.map(x => `<li>${x}</li>`).join("")
+      : `<li class="muted">Пока записей нет</li>`;
+  }
+
+  function formatTime(sec){
+    const m = Math.floor(sec / 60), s = sec % 60;
+    return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  }
+
+  function renderTime(){
+    const clock = $("clock");
+    clock.textContent = formatTime(remaining);
+    clock.classList.toggle("warn", remaining <= 10 && remaining > 0 && running);
+    clock.classList.toggle("done", remaining <= 0);
+    const pct = duration > 0 ? Math.max(0, remaining / duration) * 100 : 0;
+    $("bar").style.width = pct + "%";
+    document.title = running
+      ? formatTime(remaining) + " • Chest Timer"
+      : "NEON CHEST TIMER";
+  }
+
+  // ---------- Звук и вибрация ----------
+  let audioCtx = null;
+  function beep(){
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = audioCtx.currentTime;
+      [0, .25, .5].forEach(offset => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = "sine";
+        o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, t + offset);
+        g.gain.exponentialRampToValueAtTime(0.3, t + offset + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + offset + 0.2);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(t + offset);
+        o.stop(t + offset + 0.22);
+      });
+    }catch(e){}
+  }
+  function signal(){
+    beep();
+    if(navigator.vibrate) navigator.vibrate([300,150,300]);
+  }
+
+  // ---------- Таймер ----------
+  function tick(){
+    remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+    renderTime();
+    if(remaining <= 0){
+      finish();
+    }
+  }
+
+  function finish(){
+    clearInterval(interval); interval = null;
+    running = false;
+    $("start").textContent = "СТАРТ";
+    $("status").textContent = "⏰ Время вышло! Проверь сундук.";
+    renderTime();
+    signal();
+  }
+
+  function start(){
+    if(running){ // пауза
+      clearInterval(interval); interval = null;
+      running = false;
+      remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
+      $("start").textContent = "ПРОДОЛЖИТЬ";
+      $("status").textContent = "Пауза";
+      renderTime();
+      return;
+    }
+    if(remaining <= 0) reset();
+    // Разблокировка аудио на iOS
+    try{ audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)(); audioCtx.resume(); }catch(e){}
+
+    running = true;
+    endTime = Date.now() + remaining * 1000;
+    $("start").textContent = "ПАУЗА";
+    $("status").textContent = "Таймер запущен";
+    clearInterval(interval);
+    interval = setInterval(tick, 250);
+    tick();
+  }
+
+  function reset(){
+    clearInterval(interval); interval = null;
+    running = false;
+    duration = Math.max(1, Number($("duration").value) || 60);
+    remaining = duration;
+    $("start").textContent = "СТАРТ";
+    $("status").textContent = "Готов к запуску";
+    renderTime();
+  }
+
+  // ---------- Запись результатов ----------
+  function record(success, coins){
+    data.chests++;
+    if(success){ data.wins++; data.coins += coins; }
+    const now = new Date().toLocaleString("ru-RU", {dateStyle:"short", timeStyle:"short"});
+    data.history.unshift(
+      `<span class="muted">${now}</span> — ` +
+      (success
+        ? `<span style="color:var(--good)">+${coins} 🪙</span>`
+        : `<span style="color:var(--bad)">без награды</span>`)
+    );
+    data.history = data.history.slice(0, 50);
+    save(); render();
+  }
+
+  // ---------- События ----------
+  $("start").onclick = start;
+  $("reset").onclick = () => {
+    if(running || remaining < duration){
+      if(!confirm("Сбросить текущий таймер?")) return;
+    }
+    reset();
+  };
+  $("duration").onchange = reset;
+
+  $("success").onclick = () => {
+    const input = $("coinInput");
+    const value = Number(input.value);
+    if(input.value.trim() === "" || !Number.isFinite(value) || value <= 0){
+      alert("Введи количество монет больше нуля");
+      input.focus();
+      return;
+    }
+    record(true, Math.floor(value));
+    input.value = "";
+    input.focus();
+  };
+  $("failure").onclick = () => record(false, 0);
+
+  $("clear").onclick = () => {
+    if(confirm("Удалить всю статистику и историю?")){
+      data = {chests:0, wins:0, coins:0, history:[]};
+      save(); render();
+    }
+  };
+
+  // Enter в поле монет = «Получил монеты»
+  $("coinInput").addEventListener("keydown", e => {
+    if(e.key === "Enter") $("success").click();
+  });
+
+  // Пробел = старт/пауза (если фокус не в поле ввода)
+  document.addEventListener("keydown", e => {
+    const tag = document.activeElement.tagName;
+    if(e.code === "Space" && tag !== "INPUT" && tag !== "SELECT"){
+      e.preventDefault(); start();
+    }
+  });
+
+  // Пересчёт после возврата на вкладку (фоновые таймеры тормозят)
+  document.addEventListener("visibilitychange", () => {
+    if(!document.hidden && running) tick();
+  });
+
+  // ---------- Инициализация ----------
+  render();
+  reset();
+})();
 </script>
 </body>
-</html>
+</html> ф
