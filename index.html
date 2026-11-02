@@ -7,12 +7,12 @@
 <style>
 :root{
   --bg:#100b19;--card:#21172e;--border:#49305f;
-  --accent:#873de0;--accent2:#d58aff;--text:#fff;--muted:#b9a9c9;
-  --good:#37d67a;--bad:#ff5c7a;
+  --accent:#873de0;--accent2:#d58aff;--muted:#b9a9c9;
+  --good:#37d67a;--bad:#ff5c7a;--coin:#ffc83d;--gift:#ff6ec7;
 }
 *{box-sizing:border-box}
 body{margin:0;padding:20px;background:radial-gradient(circle at top,#241736,var(--bg) 60%);
-  color:var(--text);font-family:system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+  color:#fff;font-family:system-ui,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
 main{max-width:520px;margin:auto}
 header{text-align:center;padding:10px 0 20px}
 h1{margin:0;color:var(--accent2);letter-spacing:1px}
@@ -27,8 +27,7 @@ h3{margin:0 0 12px}
 .progress>div{height:100%;width:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
   transition:width .3s linear}
 button,select,input{font:inherit;border:0;border-radius:12px;padding:13px}
-button{background:var(--accent);color:white;font-weight:700;cursor:pointer;transition:.15s;
-  touch-action:manipulation}
+button{background:var(--accent);color:#fff;font-weight:700;cursor:pointer;transition:.15s;touch-action:manipulation}
 button:hover{filter:brightness(1.12)}
 button:active{transform:scale(.97)}
 button.secondary{background:#49345c}
@@ -36,16 +35,32 @@ button.danger{background:#5c2433}
 button:disabled{opacity:.45;cursor:not-allowed}
 .row{display:flex;gap:10px}
 .row button{flex:1}
-select,input{width:100%;background:#130e1d;color:white;border:1px solid #62417d;margin:8px 0}
+select,input{width:100%;background:#130e1d;color:#fff;border:1px solid #62417d;margin:8px 0}
 label{color:var(--muted);font-size:14px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat{background:#130e1d;padding:14px;border-radius:12px;text-align:center}
 .num{font-size:26px;font-weight:800;color:var(--accent2)}
-ul{list-style:none;margin:0 0 12px;padding:0;max-height:220px;overflow:auto}
+.num.coin{color:var(--coin)}
+.num.gift{color:var(--gift)}
+ul{list-style:none;margin:0 0 12px;padding:0;max-height:260px;overflow:auto}
 li{padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
 li:last-child{border-bottom:0}
 small,.muted{color:var(--muted)}
 .status{text-align:center;min-height:20px;margin:0 0 14px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs button{flex:1;background:#130e1d;color:var(--muted);padding:10px;font-weight:600}
+.tabs button.active{background:var(--accent);color:#fff}
+.chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding:8px 4px;
+  background:#130e1d;border-radius:12px;margin-bottom:10px}
+.bar{flex:1;min-width:6px;border-radius:6px 6px 0 0;transition:height .3s}
+.bar.coin{background:linear-gradient(180deg,var(--coin),#c98a00)}
+.bar.gift{background:linear-gradient(180deg,var(--gift),#a0307a)}
+.legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.legend .c::before{background:var(--coin)}
+.legend .g::before{background:var(--gift)}
+select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
+.hint{font-size:12px}
 </style>
 </head>
 <body>
@@ -79,20 +94,51 @@ small,.muted{color:var(--muted)}
   <div class="stats">
     <div class="stat"><div class="num" id="chests">0</div><small>Сундуков</small></div>
     <div class="stat"><div class="num" id="wins">0</div><small>Успешных</small></div>
-    <div class="stat"><div class="num" id="coins">0</div><small>Монет</small></div>
+    <div class="stat"><div class="num coin" id="coins">0</div><small>Монет</small></div>
+    <div class="stat"><div class="num gift" id="gifts">0</div><small>Подарков</small></div>
     <div class="stat"><div class="num" id="rate">0%</div><small>Успешность</small></div>
+    <div class="stat"><div class="num" id="uniqueGifts">0</div><small>Видов подарков</small></div>
   </div>
 </section>
 
 <section class="card">
+  <h3>📈 График наград</h3>
+  <div class="chart" id="chart"></div>
+  <div class="legend"><span class="c">Монеты</span><span class="g">Подарки</span></div>
+  <p class="hint muted" style="text-align:center;margin:8px 0 0">Последние 10 записей</p>
+</section>
+
+<section class="card">
   <h3>🎁 Записать результат</h3>
-  <label for="coinInput">Количество полученных монет</label>
-  <input id="coinInput" type="number" min="1" inputmode="numeric" placeholder="Например: 100">
-  <div class="row">
-    <button id="success" style="background:var(--good);color:#06230f">Получил монеты</button>
-    <button id="failure" style="background:var(--bad);color:#2a0410">Не получил</button>
+
+  <div class="tabs" id="tabs">
+    <button data-type="none" class="active">Без награды</button>
+    <button data-type="coins">Монеты</button>
+    <button data-type="gift">Подарок</button>
   </div>
-  <p class="muted" style="font-size:12px">Введи монеты перед нажатием «Получил монеты».</p>
+
+  <div id="panel-coins" style="display:none">
+    <label for="coinInput">Количество монет</label>
+    <input id="coinInput" type="number" min="1" inputmode="numeric" placeholder="Например: 100">
+  </div>
+
+  <div id="panel-gift" style="display:none">
+    <label for="giftName">Подарок (название)</label>
+    <input id="giftName" list="giftList" placeholder="Например: Роза">
+    <datalist id="giftList">
+      <option value="Роза"><option value="TikTok"><option value="Лев">
+      <option value="Ракета"><option value="Медведь"><option value="Университет">
+      <option value="Корона"><option value="Плюшевый мишка"><option value="Галактика">
+    </datalist>
+    <label for="giftQty">Количество</label>
+    <input id="giftQty" type="number" min="1" value="1" inputmode="numeric">
+  </div>
+
+  <div class="row" style="margin-top:12px">
+    <button id="record" style="background:var(--good);color:#06230f">✅ Записать</button>
+    <button id="failure" style="background:var(--bad);color:#2a0410">❌ Не получил</button>
+  </div>
+  <p class="hint muted">Выбери тип награды, заполни поля и нажми «Записать».</p>
 </section>
 
 <section class="card">
@@ -110,27 +156,31 @@ small,.muted{color:var(--muted)}
 <script>
 (() => {
   "use strict";
-  const STORAGE = "chestDataV2";
+  const STORAGE = "chestDataV3";
   const $ = id => document.getElementById(id);
 
   // ---------- Состояние ----------
-  let duration = 60;
-  let remaining = duration;
-  let running = false;
-  let interval = null;
-  let endTime = 0;
+  let duration = 60, remaining = duration, running = false, interval = null, endTime = 0;
+  let recordType = "none"; // none | coins | gift
 
   let data = load();
 
+  function empty(){ return {chests:0, wins:0, coins:0, gifts:0, giftTypes:{}, history:[]}; }
   function load(){
     try{
       const raw = JSON.parse(localStorage.getItem(STORAGE) || "null");
-      if(raw && typeof raw === "object") return {
-        chests: +raw.chests || 0, wins: +raw.wins || 0,
-        coins: +raw.coins || 0, history: Array.isArray(raw.history) ? raw.history : []
-      };
+      if(raw && typeof raw === "object"){
+        return {
+          chests: +raw.chests || 0,
+          wins: +raw.wins || 0,
+          coins: +raw.coins || 0,
+          gifts: +raw.gifts || 0,
+          giftTypes: raw.giftTypes && typeof raw.giftTypes === "object" ? raw.giftTypes : {},
+          history: Array.isArray(raw.history) ? raw.history : []
+        };
+      }
     }catch(e){}
-    return {chests:0, wins:0, coins:0, history:[]};
+    return empty();
   }
   function save(){
     try{ localStorage.setItem(STORAGE, JSON.stringify(data)); }catch(e){}
@@ -141,13 +191,37 @@ small,.muted{color:var(--muted)}
     $("chests").textContent = data.chests;
     $("wins").textContent = data.wins;
     $("coins").textContent = data.coins.toLocaleString("ru-RU");
+    $("gifts").textContent = data.gifts;
     $("rate").textContent = data.chests
       ? Math.round(data.wins / data.chests * 100) + "%" : "0%";
+    $("uniqueGifts").textContent = Object.keys(data.giftTypes).length;
 
     const list = $("history");
     list.innerHTML = data.history.length
-      ? data.history.map(x => `<li>${x}</li>`).join("")
+      ? data.history.map(h => `<li>${h}</li>`).join("")
       : `<li class="muted">Пока записей нет</li>`;
+
+    renderChart();
+  }
+
+  function renderChart(){
+    const chart = $("chart");
+    const recent = data.history.slice(0, 10).reverse();
+    if(!recent.length){
+      chart.innerHTML = `<div class="muted" style="margin:auto;font-size:12px">Нет данных</div>`;
+      return;
+    }
+    // храним числовые значения в data-атрибутах истории (см. ниже),
+    // но также можем восстановить из текста — лучше хранить отдельно.
+    // Используем lastRecords (см. record()).
+    const values = recent.map(h => h.__v || {c:0,g:0});
+    const max = Math.max(1, ...values.map(v => v.c + v.g));
+    chart.innerHTML = values.map(v => {
+      const hc = Math.round(v.c / max * 100);
+      const hg = Math.round(v.g / max * 100);
+      return `<div class="bar coin" style="height:${hc}%" title="Монеты: ${v.c}"></div>
+              <div class="bar gift" style="height:${hg}%" title="Подарки: ${v.g}"></div>`;
+    }).join("");
   }
 
   function formatTime(sec){
@@ -162,28 +236,23 @@ small,.muted{color:var(--muted)}
     clock.classList.toggle("done", remaining <= 0);
     const pct = duration > 0 ? Math.max(0, remaining / duration) * 100 : 0;
     $("bar").style.width = pct + "%";
-    document.title = running
-      ? formatTime(remaining) + " • Chest Timer"
-      : "NEON CHEST TIMER";
+    document.title = running ? formatTime(remaining) + " • Chest Timer" : "NEON CHEST TIMER";
   }
 
-  // ---------- Звук и вибрация ----------
+  // ---------- Звук ----------
   let audioCtx = null;
   function beep(){
     try{
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       const t = audioCtx.currentTime;
-      [0, .25, .5].forEach(offset => {
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        o.type = "sine";
-        o.frequency.value = 880;
-        g.gain.setValueAtTime(0.0001, t + offset);
-        g.gain.exponentialRampToValueAtTime(0.3, t + offset + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + offset + 0.2);
+      [0, .25, .5].forEach(o0 => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, t + o0);
+        g.gain.exponentialRampToValueAtTime(0.3, t + o0 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + o0 + 0.2);
         o.connect(g).connect(audioCtx.destination);
-        o.start(t + offset);
-        o.stop(t + offset + 0.22);
+        o.start(t + o0); o.stop(t + o0 + 0.22);
       });
     }catch(e){}
   }
@@ -196,34 +265,24 @@ small,.muted{color:var(--muted)}
   function tick(){
     remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
     renderTime();
-    if(remaining <= 0){
-      finish();
-    }
+    if(remaining <= 0) finish();
   }
-
   function finish(){
-    clearInterval(interval); interval = null;
-    running = false;
+    clearInterval(interval); interval = null; running = false;
     $("start").textContent = "СТАРТ";
     $("status").textContent = "⏰ Время вышло! Проверь сундук.";
-    renderTime();
-    signal();
+    renderTime(); signal();
   }
-
   function start(){
-    if(running){ // пауза
-      clearInterval(interval); interval = null;
-      running = false;
+    if(running){
+      clearInterval(interval); interval = null; running = false;
       remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
       $("start").textContent = "ПРОДОЛЖИТЬ";
       $("status").textContent = "Пауза";
-      renderTime();
-      return;
+      renderTime(); return;
     }
     if(remaining <= 0) reset();
-    // Разблокировка аудио на iOS
     try{ audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)(); audioCtx.resume(); }catch(e){}
-
     running = true;
     endTime = Date.now() + remaining * 1000;
     $("start").textContent = "ПАУЗА";
@@ -232,10 +291,8 @@ small,.muted{color:var(--muted)}
     interval = setInterval(tick, 250);
     tick();
   }
-
   function reset(){
-    clearInterval(interval); interval = null;
-    running = false;
+    clearInterval(interval); interval = null; running = false;
     duration = Math.max(1, Number($("duration").value) || 60);
     remaining = duration;
     $("start").textContent = "СТАРТ";
@@ -243,74 +300,167 @@ small,.muted{color:var(--muted)}
     renderTime();
   }
 
-  // ---------- Запись результатов ----------
-  function record(success, coins){
+  // ---------- Запись ----------
+  function nowStr(){
+    return new Date().toLocaleString("ru-RU", {dateStyle:"short", timeStyle:"short"});
+  }
+
+  function record(kind, payload){
     data.chests++;
-    if(success){ data.wins++; data.coins += coins; }
-    const now = new Date().toLocaleString("ru-RU", {dateStyle:"short", timeStyle:"short"});
-    data.history.unshift(
-      `<span class="muted">${now}</span> — ` +
-      (success
-        ? `<span style="color:var(--good)">+${coins} 🪙</span>`
-        : `<span style="color:var(--bad)">без награды</span>`)
-    );
+    const time = nowStr();
+    let entry = "", v = {c:0, g:0};
+
+    if(kind === "coins"){
+      const coins = payload.coins;
+      data.wins++; data.coins += coins;
+      v.c = coins;
+      entry = `<span class="muted">${time}</span> — <span style="color:var(--good)">+${coins} 🪙 монет</span>`;
+    }
+    else if(kind === "gift"){
+      const {name, qty} = payload;
+      data.wins++; data.gifts += qty;
+      data.giftTypes[name] = (data.giftTypes[name] || 0) + qty;
+      v.g = qty;
+      entry = `<span class="muted">${time}</span> — <span style="color:var(--gift)">🎁 ${name} ×${qty}</span>`;
+    }
+    else {
+      entry = `<span class="muted">${time}</span> — <span style="color:var(--bad)">без награды</span>`;
+    }
+
+    // Сохраняем числовые данные для графика отдельным объектом-заглушкой
+    const h = {__v: v, __h: entry};
+    // Но для простоты храним как объект — переопределим сериализацию в render
+    data.history.unshift(h);
     data.history = data.history.slice(0, 50);
+
     save(); render();
   }
 
-  // ---------- События ----------
+  // Переопределяем render истории под объектную структуру V3
+  // (упрощённо: history хранит {__v, __h})
+  const _render = render;
+  render = function(){
+    $("chests").textContent = data.chests;
+    $("wins").textContent = data.wins;
+    $("coins").textContent = data.coins.toLocaleString("ru-RU");
+    $("gifts").textContent = data.gifts;
+    $("rate").textContent = data.chests
+      ? Math.round(data.wins / data.chests * 100) + "%" : "0%";
+    $("uniqueGifts").textContent = Object.keys(data.giftTypes).length;
+
+    const list = $("history");
+    const items = data.history.map(h => {
+      if(typeof h === "string") return h;              // совместимость со старой версией
+      if(h && typeof h === "object" && h.__h) return h.__h;
+      return "";
+    }).filter(Boolean);
+
+    list.innerHTML = items.length
+      ? items.map(x => `<li>${x}</li>`).join("")
+      : `<li class="muted">Пока записей нет</li>`;
+
+    renderChart();
+  };
+
+  // ---------- График ----------
+  function renderChart(){
+    const chart = $("chart");
+    const recent = data.history.slice(0, 10).reverse();
+    if(!recent.length){
+      chart.innerHTML = `<div class="muted" style="margin:auto;font-size:12px">Нет данных</div>`;
+      return;
+    }
+    const values = recent.map(h => (h && h.__v) ? h.__v : {c:0, g:0});
+    const max = Math.max(1, ...values.map(v => v.c + v.g));
+    chart.innerHTML = values.map(v => {
+      const hc = Math.round(v.c / max * 100);
+      const hg = Math.round(v.g / max * 100);
+      return `<div class="bar coin" style="height:${hc}%" title="Монеты: ${v.c}"></div>
+              <div class="bar gift" style="height:${hg}%" title="Подарки: ${v.g}"></div>`;
+    }).join("");
+  }
+
+  // ---------- Вкладки типа награды ----------
+  function setType(t){
+    recordType = t;
+    document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.type === t));
+    $("panel-coins").style.display = t === "coins" ? "" : "none";
+    $("panel-gift").style.display = t === "gift" ? "" : "none";
+  }
+  $("tabs").addEventListener("click", e => {
+    const b = e.target.closest("button[data-type]");
+    if(b) setType(b.dataset.type);
+  });
+
+  // ---------- Кнопки записи ----------
+  $("record").onclick = () => {
+    if(recordType === "none"){
+      if(!confirm("Записать сундук без награды?")) return;
+      record("none", {});
+      return;
+    }
+    if(recordType === "coins"){
+      const input = $("coinInput");
+      const value = Number(input.value);
+      if(input.value.trim() === "" || !Number.isFinite(value) || value <= 0){
+        alert("Введи количество монет больше нуля"); input.focus(); return;
+      }
+      record("coins", {coins: Math.floor(value)});
+      input.value = ""; input.focus();
+      return;
+    }
+    if(recordType === "gift"){
+      const nameEl = $("giftName"), qtyEl = $("giftQty");
+      const name = nameEl.value.trim();
+      const qty = Number(qtyEl.value);
+      if(!name){ alert("Введи название подарка"); nameEl.focus(); return; }
+      if(!Number.isFinite(qty) || qty <= 0){ alert("Количество должно быть больше нуля"); qtyEl.focus(); return; }
+      record("gift", {name, qty: Math.floor(qty)});
+      nameEl.value = ""; qtyEl.value = "1"; nameEl.focus();
+    }
+  };
+
+  $("failure").onclick = () => {
+    if(confirm("Записать сундук без награды?")) record("none", {});
+  };
+
   $("start").onclick = start;
   $("reset").onclick = () => {
-    if(running || remaining < duration){
-      if(!confirm("Сбросить текущий таймер?")) return;
-    }
+    if((running || remaining < duration) && !confirm("Сбросить текущий таймер?")) return;
     reset();
   };
   $("duration").onchange = reset;
 
-  $("success").onclick = () => {
-    const input = $("coinInput");
-    const value = Number(input.value);
-    if(input.value.trim() === "" || !Number.isFinite(value) || value <= 0){
-      alert("Введи количество монет больше нуля");
-      input.focus();
-      return;
-    }
-    record(true, Math.floor(value));
-    input.value = "";
-    input.focus();
-  };
-  $("failure").onclick = () => record(false, 0);
-
   $("clear").onclick = () => {
     if(confirm("Удалить всю статистику и историю?")){
-      data = {chests:0, wins:0, coins:0, history:[]};
-      save(); render();
+      data = empty(); save(); render();
     }
   };
 
-  // Enter в поле монет = «Получил монеты»
-  $("coinInput").addEventListener("keydown", e => {
-    if(e.key === "Enter") $("success").click();
+  // Enter в полях = «Записать»
+  ["coinInput","giftName","giftQty"].forEach(id => {
+    $(id).addEventListener("keydown", e => {
+      if(e.key === "Enter"){ e.preventDefault(); $("record").click(); }
+    });
   });
 
-  // Пробел = старт/пауза (если фокус не в поле ввода)
+  // Пробел = старт/пауза
   document.addEventListener("keydown", e => {
     const tag = document.activeElement.tagName;
-    if(e.code === "Space" && tag !== "INPUT" && tag !== "SELECT"){
+    if(e.code === "Space" && tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA"){
       e.preventDefault(); start();
     }
   });
 
-  // Пересчёт после возврата на вкладку (фоновые таймеры тормозят)
   document.addEventListener("visibilitychange", () => {
     if(!document.hidden && running) tick();
   });
 
   // ---------- Инициализация ----------
+  setType("none");
   render();
   reset();
 })();
 </script>
 </body>
-</html> ф
+</html>
