@@ -59,7 +59,25 @@ small,.muted{color:var(--muted)}
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
 .legend .c::before{background:var(--coin)}
 .legend .g::before{background:var(--gift)}
-select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
+
+/* Шансы */
+.chance-row{display:grid;grid-template-columns:1fr 84px 32px;gap:8px;align-items:center;margin:6px 0}
+.chance-row input{margin:0;padding:10px}
+.chance-row .pct{display:flex;align-items:center;gap:4px}
+.chance-row .pct input{width:100%;text-align:right}
+.chance-row .del{background:#5c2433;padding:8px;font-size:14px;border-radius:8px}
+.chance-row .lbl{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chance-row .lbl .tag{font-size:10px;padding:2px 6px;border-radius:6px;margin-left:6px;vertical-align:middle}
+.tag.coins{background:var(--coin);color:#2b1d00}
+.tag.gift{background:var(--gift);color:#2b041a}
+.chance-total{padding:10px;border-radius:10px;text-align:center;font-weight:700;margin-top:10px}
+.chance-total.ok{background:#12301f;color:var(--good)}
+.chance-total.bad{background:#3a1620;color:var(--bad)}
+.chance-total small{display:block;font-weight:400;margin-top:4px;font-size:12px}
+.roll-result{margin-top:10px;padding:14px;border-radius:12px;background:#130e1d;text-align:center;display:none}
+.roll-result.show{display:block}
+.roll-result .big{font-size:22px;font-weight:800}
+.roll-result .muted{font-size:12px}
 .hint{font-size:12px}
 </style>
 </head>
@@ -67,7 +85,7 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
 <main>
 <header>
   <h1>NEON CHEST TIMER</h1>
-  <p class="muted">TikTok LIVE • Таймер сундуков</p>
+  <p class="muted">TikTok LIVE • Таймер сундуков и шансы</p>
 </header>
 
 <section class="card">
@@ -89,6 +107,27 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
   </select>
 </section>
 
+<!-- ====== РЕДАКТОР ШАНСОВ ====== -->
+<section class="card">
+  <h3>🎲 Шансы на выпадение</h3>
+  <p class="hint muted" style="margin-top:0">
+    Задайте шанс (в %) для каждой награды. Сумма должна быть <b>≤ 100%</b>.
+    Остаток — «без награды». Нажмите «Крутить» — программа разыграет результат по вашим шансам.
+  </p>
+
+  <div id="chanceList"></div>
+
+  <button class="secondary" id="addReward" style="width:100%;margin-top:10px">+ Добавить награду</button>
+
+  <div class="chance-total" id="chanceTotal"></div>
+
+  <div class="row" style="margin-top:12px">
+    <button id="spin" style="background:var(--good);color:#06230f">🎰 КРУТИТЬ СУНДУК</button>
+  </div>
+
+  <div class="roll-result" id="rollResult"></div>
+</section>
+
 <section class="card">
   <h3>📊 Статистика</h3>
   <div class="stats">
@@ -96,8 +135,8 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
     <div class="stat"><div class="num" id="wins">0</div><small>Успешных</small></div>
     <div class="stat"><div class="num coin" id="coins">0</div><small>Монет</small></div>
     <div class="stat"><div class="num gift" id="gifts">0</div><small>Подарков</small></div>
-    <div class="stat"><div class="num" id="rate">0%</div><small>Успешность</small></div>
-    <div class="stat"><div class="num" id="uniqueGifts">0</div><small>Видов подарков</small></div>
+    <div class="stat"><div class="num" id="rate">0%</div><small>Реальная успешность</small></div>
+    <div class="stat"><div class="num" id="expected">—</div><small>Ожидаемый шанс</small></div>
   </div>
 </section>
 
@@ -106,39 +145,6 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
   <div class="chart" id="chart"></div>
   <div class="legend"><span class="c">Монеты</span><span class="g">Подарки</span></div>
   <p class="hint muted" style="text-align:center;margin:8px 0 0">Последние 10 записей</p>
-</section>
-
-<section class="card">
-  <h3>🎁 Записать результат</h3>
-
-  <div class="tabs" id="tabs">
-    <button data-type="none" class="active">Без награды</button>
-    <button data-type="coins">Монеты</button>
-    <button data-type="gift">Подарок</button>
-  </div>
-
-  <div id="panel-coins" style="display:none">
-    <label for="coinInput">Количество монет</label>
-    <input id="coinInput" type="number" min="1" inputmode="numeric" placeholder="Например: 100">
-  </div>
-
-  <div id="panel-gift" style="display:none">
-    <label for="giftName">Подарок (название)</label>
-    <input id="giftName" list="giftList" placeholder="Например: Роза">
-    <datalist id="giftList">
-      <option value="Роза"><option value="TikTok"><option value="Лев">
-      <option value="Ракета"><option value="Медведь"><option value="Университет">
-      <option value="Корона"><option value="Плюшевый мишка"><option value="Галактика">
-    </datalist>
-    <label for="giftQty">Количество</label>
-    <input id="giftQty" type="number" min="1" value="1" inputmode="numeric">
-  </div>
-
-  <div class="row" style="margin-top:12px">
-    <button id="record" style="background:var(--good);color:#06230f">✅ Записать</button>
-    <button id="failure" style="background:var(--bad);color:#2a0410">❌ Не получил</button>
-  </div>
-  <p class="hint muted">Выбери тип награды, заполни поля и нажми «Записать».</p>
 </section>
 
 <section class="card">
@@ -156,27 +162,49 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
 <script>
 (() => {
   "use strict";
-  const STORAGE = "chestDataV3";
+  const STORAGE = "chestDataV4";
   const $ = id => document.getElementById(id);
 
   // ---------- Состояние ----------
   let duration = 60, remaining = duration, running = false, interval = null, endTime = 0;
-  let recordType = "none"; // none | coins | gift
 
   let data = load();
 
-  function empty(){ return {chests:0, wins:0, coins:0, gifts:0, giftTypes:{}, history:[]}; }
+  function empty(){ return {
+    chests:0, wins:0, coins:0, gifts:0, giftTypes:{}, history:[],
+    rewards: defaultRewards()
+  };}
+
+  function defaultRewards(){
+    return [
+      {id: uid(), name:"100 монет",  type:"coins", chance:10, value:100},
+      {id: uid(), name:"Роза",       type:"gift",  chance:5,  value:1}
+    ];
+  }
+  let uidCounter = 0;
+  function uid(){ return "r" + (Date.now().toString(36)) + "_" + (uidCounter++); }
+
   function load(){
     try{
       const raw = JSON.parse(localStorage.getItem(STORAGE) || "null");
       if(raw && typeof raw === "object"){
+        const rewards = Array.isArray(raw.rewards) && raw.rewards.length
+          ? raw.rewards.map(r => ({
+              id: r.id || uid(),
+              name: String(r.name || "Награда"),
+              type: r.type === "gift" ? "gift" : "coins",
+              chance: clamp(+r.chance || 0, 0, 100),
+              value: Math.max(1, Math.floor(+r.value || 1))
+            }))
+          : defaultRewards();
         return {
           chests: +raw.chests || 0,
           wins: +raw.wins || 0,
           coins: +raw.coins || 0,
           gifts: +raw.gifts || 0,
           giftTypes: raw.giftTypes && typeof raw.giftTypes === "object" ? raw.giftTypes : {},
-          history: Array.isArray(raw.history) ? raw.history : []
+          history: Array.isArray(raw.history) ? raw.history : [],
+          rewards
         };
       }
     }catch(e){}
@@ -185,8 +213,130 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
   function save(){
     try{ localStorage.setItem(STORAGE, JSON.stringify(data)); }catch(e){}
   }
+  function clamp(v, a, b){ return Math.min(b, Math.max(a, v)); }
 
-  // ---------- Отрисовка ----------
+  // ---------- Отрисовка шансов ----------
+  function totalChance(){
+    return data.rewards.reduce((s, r) => s + clamp(+r.chance || 0, 0, 100), 0);
+  }
+
+  function renderChances(){
+    const wrap = $("chanceList");
+    wrap.innerHTML = data.rewards.map(r => `
+      <div class="chance-row" data-id="${r.id}">
+        <input class="lbl" data-field="name" value="${escapeAttr(r.name)}" placeholder="Название награды">
+        <div class="pct">
+          <input type="number" min="0" max="100" step="0.1" data-field="chance" value="${r.chance}">
+          <span>%</span>
+        </div>
+        <button class="del" data-action="del" title="Удалить">✕</button>
+      </div>
+    `).join("");
+
+    // привязка событий
+    wrap.querySelectorAll(".chance-row").forEach(row => {
+      const id = row.dataset.id;
+      const r = data.rewards.find(x => x.id === id);
+      if(!r) return;
+
+      row.querySelector('[data-field="name"]').addEventListener("input", e => {
+        r.name = e.target.value;
+        updateTotals();
+        save();
+      });
+      row.querySelector('[data-field="chance"]').addEventListener("input", e => {
+        let v = parseFloat(e.target.value);
+        if(!Number.isFinite(v)) v = 0;
+        v = clamp(v, 0, 100);
+        r.chance = v;
+        updateTotals();
+        save();
+      });
+      row.querySelector('[data-action="del"]').addEventListener("click", () => {
+        data.rewards = data.rewards.filter(x => x.id !== id);
+        save(); renderChances(); renderExpected();
+      });
+    });
+
+    updateTotals();
+    renderExpected();
+  }
+
+  function escapeAttr(s){
+    return String(s)
+      .replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+      .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function updateTotals(){
+    const t = totalChance();
+    const el = $("chanceTotal");
+    const noReward = Math.max(0, 100 - t);
+    if(t > 100){
+      el.className = "chance-total bad";
+      el.innerHTML = `Сумма шансов: <b>${t.toFixed(1)}%</b> — больше 100%!
+        <small>Уменьшите шансы на ${(t-100).toFixed(1)}%</small>`;
+      $("spin").disabled = true;
+    }else{
+      el.className = "chance-total ok";
+      el.innerHTML = `Сумма шансов наград: <b>${t.toFixed(1)}%</b>
+        <small>Без награды: ${noReward.toFixed(1)}%</small>`;
+      $("spin").disabled = data.rewards.length === 0;
+    }
+  }
+
+  function renderExpected(){
+    const t = totalChance();
+    $("expected").textContent = t.toFixed(1) + "%";
+  }
+
+  // ---------- Кручение сундука ----------
+  function rollOnce(){
+    // Собираем «билеты»: каждый процент = 1 билет, остаток = «без награды»
+    const t = totalChance();
+    if(t > 100 || data.rewards.length === 0) return null;
+
+    // нормализуем: если сумма <100 — остаток уходит в «none»
+    const r = Math.random() * 100;
+    let acc = 0;
+    for(const reward of data.rewards){
+      acc += clamp(+reward.chance || 0, 0, 100);
+      if(r < acc) return reward;
+    }
+    return null; // без награды
+  }
+
+  $("spin").onclick = () => {
+    const reward = rollOnce();
+    const box = $("rollResult");
+
+    if(reward){
+      // записываем результат
+      if(reward.type === "coins"){
+        record("coins", {coins: reward.value, name: reward.name});
+        box.innerHTML = `<div class="big" style="color:var(--good)">🪙 ${escapeHtml(reward.name)}</div>
+          <div class="muted">+${reward.value} монет</div>`;
+      }else{
+        record("gift", {name: reward.name, qty: reward.value});
+        box.innerHTML = `<div class="big" style="color:var(--gift)">🎁 ${escapeHtml(reward.name)}</div>
+          <div class="muted">×${reward.value}</div>`;
+      }
+    }else{
+      record("none", {});
+      box.innerHTML = `<div class="big" style="color:var(--bad)">Без награды</div>
+        <div class="muted">В этот раз пусто</div>`;
+    }
+    box.classList.add("show");
+    signal();
+  };
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    })[c]);
+  }
+
+  // ---------- Статистика / история / график ----------
   function render(){
     $("chests").textContent = data.chests;
     $("wins").textContent = data.wins;
@@ -194,11 +344,17 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
     $("gifts").textContent = data.gifts;
     $("rate").textContent = data.chests
       ? Math.round(data.wins / data.chests * 100) + "%" : "0%";
-    $("uniqueGifts").textContent = Object.keys(data.giftTypes).length;
+    renderExpected();
 
     const list = $("history");
-    list.innerHTML = data.history.length
-      ? data.history.map(h => `<li>${h}</li>`).join("")
+    const items = data.history.map(h => {
+      if(typeof h === "string") return h;
+      if(h && typeof h === "object" && h.__h) return h.__h;
+      return "";
+    }).filter(Boolean);
+
+    list.innerHTML = items.length
+      ? items.map(x => `<li>${x}</li>`).join("")
       : `<li class="muted">Пока записей нет</li>`;
 
     renderChart();
@@ -211,10 +367,7 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
       chart.innerHTML = `<div class="muted" style="margin:auto;font-size:12px">Нет данных</div>`;
       return;
     }
-    // храним числовые значения в data-атрибутах истории (см. ниже),
-    // но также можем восстановить из текста — лучше хранить отдельно.
-    // Используем lastRecords (см. record()).
-    const values = recent.map(h => h.__v || {c:0,g:0});
+    const values = recent.map(h => (h && h.__v) ? h.__v : {c:0, g:0});
     const max = Math.max(1, ...values.map(v => v.c + v.g));
     chart.innerHTML = values.map(v => {
       const hc = Math.round(v.c / max * 100);
@@ -224,11 +377,44 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
     }).join("");
   }
 
+  function nowStr(){
+    return new Date().toLocaleString("ru-RU", {dateStyle:"short", timeStyle:"short"});
+  }
+
+  function record(kind, payload){
+    data.chests++;
+    const time = nowStr();
+    let entry = "", v = {c:0, g:0};
+
+    if(kind === "coins"){
+      const coins = Math.max(1, Math.floor(payload.coins));
+      data.wins++; data.coins += coins;
+      v.c = coins;
+      const label = payload.name ? ` (${escapeHtml(payload.name)})` : "";
+      entry = `<span class="muted">${time}</span> — <span style="color:var(--good)">+${coins} 🪙${label}</span>`;
+    }
+    else if(kind === "gift"){
+      const name = String(payload.name || "Подарок").trim() || "Подарок";
+      const qty = Math.max(1, Math.floor(payload.qty || 1));
+      data.wins++; data.gifts += qty;
+      data.giftTypes[name] = (data.giftTypes[name] || 0) + qty;
+      v.g = qty;
+      entry = `<span class="muted">${time}</span> — <span style="color:var(--gift)">🎁 ${escapeHtml(name)} ×${qty}</span>`;
+    }
+    else {
+      entry = `<span class="muted">${time}</span> — <span style="color:var(--bad)">без награды</span>`;
+    }
+
+    data.history.unshift({__v: v, __h: entry});
+    data.history = data.history.slice(0, 50);
+    save(); render();
+  }
+
+  // ---------- Таймер ----------
   function formatTime(sec){
     const m = Math.floor(sec / 60), s = sec % 60;
     return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
   }
-
   function renderTime(){
     const clock = $("clock");
     clock.textContent = formatTime(remaining);
@@ -238,30 +424,6 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
     $("bar").style.width = pct + "%";
     document.title = running ? formatTime(remaining) + " • Chest Timer" : "NEON CHEST TIMER";
   }
-
-  // ---------- Звук ----------
-  let audioCtx = null;
-  function beep(){
-    try{
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      const t = audioCtx.currentTime;
-      [0, .25, .5].forEach(o0 => {
-        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = "sine"; o.frequency.value = 880;
-        g.gain.setValueAtTime(0.0001, t + o0);
-        g.gain.exponentialRampToValueAtTime(0.3, t + o0 + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + o0 + 0.2);
-        o.connect(g).connect(audioCtx.destination);
-        o.start(t + o0); o.stop(t + o0 + 0.22);
-      });
-    }catch(e){}
-  }
-  function signal(){
-    beep();
-    if(navigator.vibrate) navigator.vibrate([300,150,300]);
-  }
-
-  // ---------- Таймер ----------
   function tick(){
     remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
     renderTime();
@@ -270,7 +432,7 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
   function finish(){
     clearInterval(interval); interval = null; running = false;
     $("start").textContent = "СТАРТ";
-    $("status").textContent = "⏰ Время вышло! Проверь сундук.";
+    $("status").textContent = "⏰ Время вышло! Крути сундук.";
     renderTime(); signal();
   }
   function start(){
@@ -300,128 +462,38 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
     renderTime();
   }
 
-  // ---------- Запись ----------
-  function nowStr(){
-    return new Date().toLocaleString("ru-RU", {dateStyle:"short", timeStyle:"short"});
+  // ---------- Звук ----------
+  let audioCtx = null;
+  function beep(){
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const t = audioCtx.currentTime;
+      [0, .25, .5].forEach(o0 => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, t + o0);
+        g.gain.exponentialRampToValueAtTime(0.3, t + o0 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + o0 + 0.2);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(t + o0); o.stop(t + o0 + 0.22);
+      });
+    }catch(e){}
+  }
+  function signal(){
+    beep();
+    if(navigator.vibrate) navigator.vibrate([300,150,300]);
   }
 
-  function record(kind, payload){
-    data.chests++;
-    const time = nowStr();
-    let entry = "", v = {c:0, g:0};
-
-    if(kind === "coins"){
-      const coins = payload.coins;
-      data.wins++; data.coins += coins;
-      v.c = coins;
-      entry = `<span class="muted">${time}</span> — <span style="color:var(--good)">+${coins} 🪙 монет</span>`;
-    }
-    else if(kind === "gift"){
-      const {name, qty} = payload;
-      data.wins++; data.gifts += qty;
-      data.giftTypes[name] = (data.giftTypes[name] || 0) + qty;
-      v.g = qty;
-      entry = `<span class="muted">${time}</span> — <span style="color:var(--gift)">🎁 ${name} ×${qty}</span>`;
-    }
-    else {
-      entry = `<span class="muted">${time}</span> — <span style="color:var(--bad)">без награды</span>`;
-    }
-
-    // Сохраняем числовые данные для графика отдельным объектом-заглушкой
-    const h = {__v: v, __h: entry};
-    // Но для простоты храним как объект — переопределим сериализацию в render
-    data.history.unshift(h);
-    data.history = data.history.slice(0, 50);
-
-    save(); render();
-  }
-
-  // Переопределяем render истории под объектную структуру V3
-  // (упрощённо: history хранит {__v, __h})
-  const _render = render;
-  render = function(){
-    $("chests").textContent = data.chests;
-    $("wins").textContent = data.wins;
-    $("coins").textContent = data.coins.toLocaleString("ru-RU");
-    $("gifts").textContent = data.gifts;
-    $("rate").textContent = data.chests
-      ? Math.round(data.wins / data.chests * 100) + "%" : "0%";
-    $("uniqueGifts").textContent = Object.keys(data.giftTypes).length;
-
-    const list = $("history");
-    const items = data.history.map(h => {
-      if(typeof h === "string") return h;              // совместимость со старой версией
-      if(h && typeof h === "object" && h.__h) return h.__h;
-      return "";
-    }).filter(Boolean);
-
-    list.innerHTML = items.length
-      ? items.map(x => `<li>${x}</li>`).join("")
-      : `<li class="muted">Пока записей нет</li>`;
-
-    renderChart();
-  };
-
-  // ---------- График ----------
-  function renderChart(){
-    const chart = $("chart");
-    const recent = data.history.slice(0, 10).reverse();
-    if(!recent.length){
-      chart.innerHTML = `<div class="muted" style="margin:auto;font-size:12px">Нет данных</div>`;
-      return;
-    }
-    const values = recent.map(h => (h && h.__v) ? h.__v : {c:0, g:0});
-    const max = Math.max(1, ...values.map(v => v.c + v.g));
-    chart.innerHTML = values.map(v => {
-      const hc = Math.round(v.c / max * 100);
-      const hg = Math.round(v.g / max * 100);
-      return `<div class="bar coin" style="height:${hc}%" title="Монеты: ${v.c}"></div>
-              <div class="bar gift" style="height:${hg}%" title="Подарки: ${v.g}"></div>`;
-    }).join("");
-  }
-
-  // ---------- Вкладки типа награды ----------
-  function setType(t){
-    recordType = t;
-    document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.type === t));
-    $("panel-coins").style.display = t === "coins" ? "" : "none";
-    $("panel-gift").style.display = t === "gift" ? "" : "none";
-  }
-  $("tabs").addEventListener("click", e => {
-    const b = e.target.closest("button[data-type]");
-    if(b) setType(b.dataset.type);
-  });
-
-  // ---------- Кнопки записи ----------
-  $("record").onclick = () => {
-    if(recordType === "none"){
-      if(!confirm("Записать сундук без награды?")) return;
-      record("none", {});
-      return;
-    }
-    if(recordType === "coins"){
-      const input = $("coinInput");
-      const value = Number(input.value);
-      if(input.value.trim() === "" || !Number.isFinite(value) || value <= 0){
-        alert("Введи количество монет больше нуля"); input.focus(); return;
-      }
-      record("coins", {coins: Math.floor(value)});
-      input.value = ""; input.focus();
-      return;
-    }
-    if(recordType === "gift"){
-      const nameEl = $("giftName"), qtyEl = $("giftQty");
-      const name = nameEl.value.trim();
-      const qty = Number(qtyEl.value);
-      if(!name){ alert("Введи название подарка"); nameEl.focus(); return; }
-      if(!Number.isFinite(qty) || qty <= 0){ alert("Количество должно быть больше нуля"); qtyEl.focus(); return; }
-      record("gift", {name, qty: Math.floor(qty)});
-      nameEl.value = ""; qtyEl.value = "1"; nameEl.focus();
-    }
-  };
-
-  $("failure").onclick = () => {
-    if(confirm("Записать сундук без награды?")) record("none", {});
+  // ---------- События ----------
+  $("addReward").onclick = () => {
+    data.rewards.push({
+      id: uid(),
+      name: "Новая награда",
+      type: "coins",
+      chance: 0,
+      value: 10
+    });
+    save(); renderChances();
   };
 
   $("start").onclick = start;
@@ -432,19 +504,11 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
   $("duration").onchange = reset;
 
   $("clear").onclick = () => {
-    if(confirm("Удалить всю статистику и историю?")){
-      data = empty(); save(); render();
+    if(confirm("Удалить статистику, историю и настройки шансов?")){
+      data = empty(); save(); render(); renderChances();
     }
   };
 
-  // Enter в полях = «Записать»
-  ["coinInput","giftName","giftQty"].forEach(id => {
-    $(id).addEventListener("keydown", e => {
-      if(e.key === "Enter"){ e.preventDefault(); $("record").click(); }
-    });
-  });
-
-  // Пробел = старт/пауза
   document.addEventListener("keydown", e => {
     const tag = document.activeElement.tagName;
     if(e.code === "Space" && tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA"){
@@ -457,7 +521,7 @@ select.gift-sel{background:#130e1d;color:#fff;border:1px solid #62417d}
   });
 
   // ---------- Инициализация ----------
-  setType("none");
+  renderChances();
   render();
   reset();
 })();
